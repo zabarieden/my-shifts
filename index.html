@@ -42,7 +42,7 @@
         
         #published-box { margin-top: 20px; padding: 15px; background: #E0F2FE; border-radius: 10px; border: 1px solid #7DD3FC; display: none; position: relative; }
         .edit-controls { margin-top: 10px; display: flex; gap: 5px; }
-        .quick-edit-input { padding: 4px; border: 1px solid #7DD3FC; border-radius: 4px; font-size: 13px; width: 60%; margin-right: 5px; }
+        .quick-edit-input { padding: 4px; border: 1px solid #7DD3FC; border-radius: 4px; font-size: 13px; width: 65%; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -218,17 +218,15 @@
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(updates)
         });
-        alert('עודכן בהצלחה!');
+        alert('הסידור עודכן בהצלחה!');
         location.reload();
     }
 
     async function publishSchedule() {
         if(!confirm('לפרסם ולנקות את כל הגשות העובדים לשבוע הבא?')) return;
         
-        // 1. מחיקת סידור ישן
         await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=neq.-1`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
         
-        // 2. בניית שורות לסידור החדש
         const rows = [];
         DAYS.forEach(d => SHIFTS.forEach(s => {
             if (d === 'שישי' && s === 'ערב') return;
@@ -240,20 +238,18 @@
             if(names.length) rows.push({ day_id: d, shift_id: s, person_name: names.join(', '), published_at: new Date().toISOString() });
         }));
 
-        // 3. שמירת הסידור החדש
         await fetch(`${SUPABASE_URL}/rest/v1/schedule`, {
             method: 'POST',
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(rows)
         });
 
-        // 4. מחיקת כל הגשות הזמינות (shifts) מהטבלה כדי להתחיל מחדש
         await fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { 
             method: 'DELETE', 
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } 
         });
 
-        alert('הסידור פורסם והמערכת התנקה לשבוע הבא!');
+        alert('הסידור פורסם והמערכת נוקתה לשבוע הבא!');
         location.reload();
     }
 
