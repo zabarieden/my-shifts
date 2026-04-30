@@ -1,1 +1,502 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סידור משמרות</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F5F2;
+  --surface: #fff;
+  --accent: #2D6A4F;
+  --accent-light: #D8F3DC;
+  --accent-text: #1B4332;
+  --warn: #d97706;
+  --warn-light: #FEF3C7;
+  --warn-text: #92400e;
+  --danger: #DC2626;
+  --danger-light: #FEE2E2;
+  --danger-text: #7f1d1d;
+  --text: #1A1A1A;
+  --muted: #6B6B6B;
+  --border: #E5E0D8;
+  --r: 12px;
+  --sh: 0 2px 12px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl}
 
+/* header */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100}
+.logo{font-size:17px;font-weight:700;color:var(--accent)}
+.logo span{color:var(--muted);font-weight:300}
+.tabs{display:flex;gap:3px;background:var(--bg);border-radius:9px;padding:3px}
+.tab{padding:6px 14px;border:none;background:none;border-radius:7px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);transition:all .15s}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.mgr-pill{background:#FEF3C7;color:#92400e;border:1px solid #fcd34d;border-radius:6px;font-size:11px;font-weight:600;padding:3px 9px}
+
+/* main */
+main{max-width:660px;margin:0 auto;padding:24px 16px}
+
+/* card */
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:22px;margin-bottom:14px;box-shadow:var(--sh)}
+.card-title{font-size:16px;font-weight:600;margin-bottom:3px}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+
+/* form */
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;margin-top:14px;font-weight:500}
+input[type=text],textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px;color:var(--text);background:var(--surface);outline:none;transition:border .15s}
+input[type=text]:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:60px}
+
+/* legend */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 6px}
+.li{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%}
+.dy{background:var(--accent)}.dm{background:var(--warn)}.dn{background:var(--danger)}
+
+/* shift grid */
+.day-block{margin-bottom:8px}
+.day-lbl{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.srow{display:flex;gap:7px}
+.sc{flex:1;padding:9px 5px;border:1.5px solid var(--border);border-radius:9px;text-align:center;cursor:pointer;user-select:none;transition:all .15s;background:var(--bg)}
+.sc:hover{border-color:#aaa}
+.sc .sn{font-size:12px;font-weight:600}
+.sc .st{font-size:10px;color:var(--muted);margin-top:1px}
+.sc.yes{background:var(--accent-light);border-color:var(--accent)}
+.sc.yes .sn{color:var(--accent-text)}.sc.yes .st{color:var(--accent)}
+.sc.maybe{background:var(--warn-light);border-color:var(--warn)}
+.sc.maybe .sn{color:var(--warn-text)}.sc.maybe .st{color:var(--warn)}
+.sc.no{background:var(--danger-light);border-color:var(--danger)}
+.sc.no .sn{color:var(--danger-text)}.sc.no .st{color:var(--danger)}
+
+/* buttons */
+.btn{padding:9px 18px;border-radius:9px;font-family:'Heebo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:all .15s}
+.btn-green{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-green:hover{background:#1B4332}
+.btn-green:disabled{background:#aaa;border-color:#aaa;cursor:not-allowed}
+.btn-pub{background:#1d4ed8;color:#fff;border-color:#1d4ed8;width:100%;display:block;padding:12px;margin-top:16px;font-size:15px}
+.btn-pub:hover{background:#1e40af}
+.btn-sm{padding:4px 10px;font-size:12px;font-weight:500}
+
+/* toast */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:#111;color:#fff;padding:11px 22px;border-radius:99px;font-size:14px;font-weight:500;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* manager — submissions list */
+.sub-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px}
+.sub-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sub-name{font-size:15px;font-weight:600}
+.sub-ts{font-size:11px;color:var(--muted)}
+.badges{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}
+.badge{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:500}
+.by{background:var(--accent-light);color:var(--accent-text)}
+.bm{background:var(--warn-light);color:var(--warn-text)}
+.bn{background:var(--danger-light);color:var(--danger-text)}
+.sub-notes{font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:7px;margin-top:7px}
+
+/* schedule builder */
+.sched-grid{display:grid;gap:8px;margin-bottom:16px}
+.sched-row{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sched-label{font-size:13px;font-weight:600;min-width:110px}
+.sched-select{flex:1;min-width:140px;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:'Heebo',sans-serif;font-size:13px;color:var(--text);background:var(--surface);outline:none}
+.sched-select:focus{border-color:var(--accent)}
+/* availability indicator inside select area */
+.avail-hint{font-size:11px;color:var(--muted);min-width:70px}
+
+/* published schedule */
+.pub-grid{display:grid;gap:6px}
+.pub-row{border-radius:9px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between}
+.pub-row.yes{background:var(--accent-light);border:1px solid #86efac}
+.pub-row.maybe{background:var(--warn-light);border:1px solid #fcd34d}
+.pub-row.no{background:var(--danger-light);border:1px solid #fca5a5}
+.pub-row.empty{background:#f3f4f6;border:1px solid #e5e7eb}
+.pub-shift{font-size:13px;font-weight:600}
+.pub-person{font-size:13px}
+.pub-status{font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px}
+.pub-status.yes{background:var(--accent);color:#fff}
+.pub-status.maybe{background:var(--warn);color:#fff}
+.pub-status.no{background:var(--danger);color:#fff}
+.pub-status.empty{background:#9ca3af;color:#fff}
+
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.sec-title{font-size:16px;font-weight:600}
+
+.empty-state{text-align:center;padding:36px 20px;color:var(--muted);font-size:14px}
+.empty-state .icon{font-size:34px;margin-bottom:8px}
+.loading{text-align:center;padding:28px;color:var(--muted);font-size:14px}
+
+/* published banner for team */
+.pub-banner{background:var(--accent-light);border:1px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--accent-text);font-weight:500;display:flex;align-items:center;gap:8px}
+
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">משמרות <span>/ הצוות שלי</span></div>
+  <div id="hdr-right">
+    <div class="tabs" id="tab-bar" hidden>
+      <button class="tab" onclick="showTab('team')">טופס הגשה</button>
+      <button class="tab" id="tab-subs-btn" onclick="showTab('subs')">הגשות</button>
+      <button class="tab active" onclick="showTab('build')">בניית סידור</button>
+    </div>
+    <span class="mgr-pill" id="mgr-pill" hidden>מנהל/ת</span>
+  </div>
+</header>
+
+<div id="toast"></div>
+<main>
+
+<!-- ══ TEAM: form ══ -->
+<div id="tab-team">
+  <!-- published schedule banner -->
+  <div id="pub-banner" class="pub-banner" hidden>
+    ✅ הסידור פורסם! גלול/י למטה לראות את הסידור הסופי
+  </div>
+
+  <div class="card">
+    <div class="card-title">הגשת זמינות למשמרות</div>
+    <div class="card-sub">בחר/י לכל משמרת את הסטטוס שלך ולחץ/י אישור</div>
+
+    <label>שם מלא *</label>
+    <input type="text" id="emp-name" placeholder="הכנס/י שם...">
+
+    <label style="margin-top:16px">זמינות למשמרות</label>
+    <div class="legend">
+      <div class="li"><div class="dot dy"></div>יכול/ה</div>
+      <div class="li"><div class="dot dm"></div>אפשרי (עדיפות שלא)</div>
+      <div class="li"><div class="dot dn"></div>לא יכול/ה</div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px">לחיצה על משמרת מחליפה בין המצבים</p>
+
+    <div id="shifts-builder"></div>
+
+    <label>הערות / אילוצים נוספים</label>
+    <textarea id="emp-notes" placeholder="לדוגמה: שישי בצהריים קשה לי..."></textarea>
+
+    <button class="btn btn-green" id="submit-btn" onclick="submitForm()" style="width:100%;margin-top:18px;padding:12px;font-size:15px">אישור ושליחה</button>
+  </div>
+
+  <!-- published schedule shown to team -->
+  <div id="team-schedule" hidden>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">📋 סידור משמרות — פורסם</div>
+      <div class="pub-grid" id="team-pub-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MANAGER: submissions ══ -->
+<div id="tab-subs" hidden>
+  <div class="sec-head">
+    <div class="sec-title">הגשות הצוות</div>
+    <button class="btn btn-sm" onclick="loadSubs()">רענן ↻</button>
+  </div>
+  <div id="subs-list"><div class="loading">טוען...</div></div>
+</div>
+
+<!-- ══ MANAGER: build & publish ══ -->
+<div id="tab-build" hidden>
+  <div class="sec-head">
+    <div class="sec-title">בניית סידור</div>
+    <button class="btn btn-sm" onclick="loadBuild()">רענן נתונים ↻</button>
+  </div>
+  <div id="build-area"><div class="loading">טוען...</div></div>
+</div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+//  🔧 הגדרות Supabase — החלף בפרטים שלך
+// ══════════════════════════════════════════════
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const TBL_SHIFTS   = 'shifts';      // טבלת הגשות
+const TBL_SCHEDULE = 'schedule';    // טבלת סידור מפורסם
+// ══════════════════════════════════════════════
+
+const DAYS = [
+  {id:'sun',label:'ראשון'},{id:'mon',label:'שני'},{id:'tue',label:'שלישי'},
+  {id:'wed',label:'רביעי'},{id:'thu',label:'חמישי'},{id:'fri',label:'שישי'},
+];
+const SHIFT_TYPES = [
+  {id:'m',label:'בוקר',time:'07:00-14:00'},
+  {id:'e',label:'ערב', time:'14:00-20:00'},
+];
+
+let avail = {};
+let subsData = [];  // cached submissions
+
+// ── init ──────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  buildShiftGrid();
+  if (window.location.hash === '#manager') {
+    document.getElementById('tab-bar').hidden  = false;
+    document.getElementById('mgr-pill').hidden = false;
+    showTab('build');
+  } else {
+    // team view: load published schedule
+    loadPublishedForTeam();
+  }
+});
+
+// ── shift grid ────────────────────────────────
+function buildShiftGrid() {
+  let html = '';
+  DAYS.forEach(d => {
+    html += `<div class="day-block"><div class="day-lbl">${d.label}</div><div class="srow">`;
+    SHIFT_TYPES.forEach(s => {
+      const k = `${d.id}_${s.id}`;
+      avail[k] = 'none';
+      html += `<div class="sc none" id="sc-${k}" onclick="toggle('${k}')">
+        <div class="sn">${s.label}</div><div class="st">${s.time}</div></div>`;
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById('shifts-builder').innerHTML = html;
+}
+
+function toggle(k) {
+  const o = ['none','yes','maybe','no'];
+  avail[k] = o[(o.indexOf(avail[k])+1)%o.length];
+  document.getElementById('sc-'+k).className = 'sc '+avail[k];
+}
+
+// ── tabs ──────────────────────────────────────
+function showTab(t) {
+  ['team','subs','build'].forEach(x => {
+    document.getElementById('tab-'+x).hidden = (x !== t);
+  });
+  document.querySelectorAll('.tab').forEach((b,i) => {
+    b.classList.toggle('active', ['team','subs','build'][i] === t);
+  });
+  if (t === 'subs')  loadSubs();
+  if (t === 'build') loadBuild();
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3200);
+}
+
+// ── DB helpers ────────────────────────────────
+async function dbGet(table, query='') {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}
+  });
+  return r.json();
+}
+async function dbPost(table, body) {
+  return fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,
+             'Authorization':`Bearer ${SUPABASE_KEY}`,'Prefer':'return=minimal'},
+    body: JSON.stringify(body)
+  });
+}
+async function dbUpsert(table, body, onConflict) {
+  return fetch(`${SUPABASE_URL}/rest/v1/${table}?on_conflict=${onConflict}`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,
+             'Authorization':`Bearer ${SUPABASE_KEY}`,'Prefer':'resolution=merge-duplicates,return=minimal'},
+    body: JSON.stringify(body)
+  });
+}
+
+// ── TEAM: submit form ─────────────────────────
+async function submitForm() {
+  const name  = document.getElementById('emp-name').value.trim();
+  const notes = document.getElementById('emp-notes').value.trim();
+  if (!name) { showToast('נא להכניס שם'); return; }
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') { showToast('יש להגדיר Supabase קודם'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'שולח...';
+
+  try {
+    const res = await dbPost(TBL_SHIFTS, {
+      name, notes, availability: avail, submitted_at: new Date().toISOString()
+    });
+    if (!res.ok) throw new Error(await res.text());
+    showToast('✓ הזמינות נשלחה בהצלחה!');
+    document.getElementById('emp-name').value  = '';
+    document.getElementById('emp-notes').value = '';
+    Object.keys(avail).forEach(k => {
+      avail[k]='none';
+      const c=document.getElementById('sc-'+k); if(c) c.className='sc none';
+    });
+  } catch(e) { showToast('שגיאה בשמירה'); console.error(e); }
+
+  btn.disabled=false; btn.textContent='אישור ושליחה';
+}
+
+// ── TEAM: show published schedule ─────────────
+async function loadPublishedForTeam() {
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') return;
+  try {
+    const data = await dbGet(TBL_SCHEDULE, 'select=*&order=day_id.asc,shift_id.asc');
+    const published = data.filter(r => r.person_name);
+    if (!published.length) return;
+
+    document.getElementById('pub-banner').hidden = false;
+    document.getElementById('team-schedule').hidden = false;
+
+    const statusLabel = {yes:'יכול/ה',maybe:'אפשרי (עדיפות שלא)',no:'לא יכול/ה',empty:'לא שובץ'};
+    let html = '';
+    published.forEach(r => {
+      const d = DAYS.find(x=>x.id===r.day_id);
+      const s = SHIFT_TYPES.find(x=>x.id===r.shift_id);
+      const cls = r.avail_status || 'empty';
+      html += `<div class="pub-row ${cls}">
+        <div class="pub-shift">${d?d.label:r.day_id} — ${s?s.label:r.shift_id} <span style="font-weight:400;font-size:11px;color:var(--muted)">${s?s.time:''}</span></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="pub-person">${r.person_name}</div>
+          <span class="pub-status ${cls}">${statusLabel[cls]||''}</span>
+        </div>
+      </div>`;
+    });
+    document.getElementById('team-pub-grid').innerHTML = html;
+  } catch(e) { console.error(e); }
+}
+
+// ── MANAGER: submissions list ─────────────────
+async function loadSubs() {
+  document.getElementById('subs-list').innerHTML = '<div class="loading">טוען...</div>';
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    document.getElementById('subs-list').innerHTML = '<div class="empty-state"><div class="icon">⚙️</div>יש להגדיר Supabase</div>';
+    return;
+  }
+  try {
+    subsData = await dbGet(TBL_SHIFTS, 'select=*&order=submitted_at.desc');
+    if (!subsData.length) {
+      document.getElementById('subs-list').innerHTML = '<div class="empty-state"><div class="icon">📭</div>עדיין אין הגשות</div>';
+      return;
+    }
+    let html = '';
+    subsData.forEach(row => {
+      const a = row.availability||{};
+      const yes=[],maybe=[],no=[];
+      DAYS.forEach(d=>SHIFT_TYPES.forEach(s=>{
+        const k=`${d.id}_${s.id}`,lbl=`${d.label} ${s.label}`;
+        if(a[k]==='yes') yes.push(lbl);
+        if(a[k]==='maybe') maybe.push(lbl);
+        if(a[k]==='no') no.push(lbl);
+      }));
+      const ts = row.submitted_at
+        ? new Date(row.submitted_at).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
+        : '';
+      html += `<div class="sub-card">
+        <div class="sub-head"><div class="sub-name">${row.name}</div><div class="sub-ts">${ts}</div></div>`;
+      if(yes.length)   html+=`<div class="badges">${yes.map(s=>`<span class="badge by">${s}</span>`).join('')}</div>`;
+      if(maybe.length) html+=`<div class="badges">${maybe.map(s=>`<span class="badge bm">${s} (עדיפות שלא)</span>`).join('')}</div>`;
+      if(no.length)    html+=`<div class="badges">${no.map(s=>`<span class="badge bn">${s}</span>`).join('')}</div>`;
+      if(row.notes)    html+=`<div class="sub-notes">${row.notes}</div>`;
+      html += `</div>`;
+    });
+    document.getElementById('subs-list').innerHTML = html;
+  } catch(e) { document.getElementById('subs-list').innerHTML='<div class="empty-state"><div class="icon">❌</div>שגיאה בטעינה</div>'; console.error(e); }
+}
+
+// ── MANAGER: build schedule ───────────────────
+async function loadBuild() {
+  document.getElementById('build-area').innerHTML = '<div class="loading">טוען הגשות...</div>';
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+    document.getElementById('build-area').innerHTML = '<div class="empty-state"><div class="icon">⚙️</div>יש להגדיר Supabase</div>';
+    return;
+  }
+  try {
+    subsData = await dbGet(TBL_SHIFTS, 'select=*&order=submitted_at.asc');
+    const names = [...new Set(subsData.map(r=>r.name))];
+
+    if (!names.length) {
+      document.getElementById('build-area').innerHTML = '<div class="empty-state"><div class="icon">📭</div>אין הגשות עדיין</div>';
+      return;
+    }
+
+    // helper: get avail status for name+shift
+    function getStatus(name, dayId, shiftId) {
+      const row = subsData.find(r=>r.name===name);
+      if (!row) return 'none';
+      return (row.availability||{})[`${dayId}_${shiftId}`]||'none';
+    }
+    function statusEmoji(s) {
+      return s==='yes'?'✅ יכול/ה':s==='maybe'?'⚠️ אפשרי':s==='no'?'❌ לא יכול':'—';
+    }
+
+    let html = '<div class="sched-grid">';
+    DAYS.forEach(d => {
+      SHIFT_TYPES.forEach(s => {
+        const key = `${d.id}_${s.id}`;
+        html += `<div class="sched-row">
+          <div class="sched-label">${d.label} ${s.label}<br><span style="font-size:10px;color:var(--muted);font-weight:400">${s.time}</span></div>
+          <select class="sched-select" id="sel-${key}" onchange="updateHint('${key}')">
+            <option value="">— בחר/י עובד/ת —</option>
+            ${names.map(n=>{
+              const st=getStatus(n,d.id,s.id);
+              return `<option value="${n}" data-status="${st}">${n} [${statusEmoji(st)}]</option>`;
+            }).join('')}
+          </select>
+          <div class="avail-hint" id="hint-${key}"></div>
+        </div>`;
+      });
+    });
+    html += '</div>';
+    html += `<button class="btn btn-pub" onclick="publishSchedule()">📢 פרסם סידור לצוות</button>`;
+    document.getElementById('build-area').innerHTML = html;
+
+  } catch(e) { document.getElementById('build-area').innerHTML='<div class="empty-state"><div class="icon">❌</div>שגיאה</div>'; console.error(e); }
+}
+
+function updateHint(key) {
+  const sel = document.getElementById('sel-'+key);
+  const opt = sel.options[sel.selectedIndex];
+  const st  = opt ? opt.dataset.status : '';
+  const hint = document.getElementById('hint-'+key);
+  if (!hint) return;
+  const map = {yes:'✅ יכול/ה', maybe:'⚠️ עדיפות שלא', no:'❌ לא יכול', none:'', '':''};
+  hint.textContent = map[st]||'';
+}
+
+async function publishSchedule() {
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') { showToast('יש להגדיר Supabase'); return; }
+
+  const rows = [];
+  DAYS.forEach(d => {
+    SHIFT_TYPES.forEach(s => {
+      const key = `${d.id}_${s.id}`;
+      const sel = document.getElementById('sel-'+key);
+      if (!sel) return;
+      const name = sel.value;
+      let st = '';
+      if (name) {
+        const opt = sel.options[sel.selectedIndex];
+        st = opt ? (opt.dataset.status||'') : '';
+      }
+      rows.push({
+        day_id: d.id, shift_id: s.id,
+        person_name: name||null,
+        avail_status: name ? (st||'yes') : null,
+        published_at: new Date().toISOString()
+      });
+    });
+  });
+
+  try {
+    // delete old schedule then insert new
+    await fetch(`${SUPABASE_URL}/rest/v1/${TBL_SCHEDULE}?day_id=not.is.null`, {
+      method:'DELETE',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}
+    });
+    const res = await dbPost(TBL_SCHEDULE, rows);
+    if (!res.ok) throw new Error(await res.text());
+    showToast('✓ הסידור פורסם לצוות!');
+  } catch(e) { showToast('שגיאה בפרסום'); console.error(e); }
+}
+</script>
+</body>
+</html>
