@@ -43,6 +43,9 @@
         #published-box { margin-top: 20px; padding: 15px; background: #E0F2FE; border-radius: 10px; border: 1px solid #7DD3FC; display: none; position: relative; }
         .edit-controls { margin-top: 10px; display: flex; gap: 5px; }
         .quick-edit-input { padding: 4px; border: 1px solid #7DD3FC; border-radius: 4px; font-size: 13px; width: 65%; margin-right: 5px; }
+
+        .notes-area { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 15px; margin-bottom: 20px; font-size: 14px; }
+        .note-item { margin-bottom: 8px; border-bottom: 1px solid #fef3c7; padding-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -75,12 +78,16 @@
         <input type="text" id="emp-name" placeholder="איך קוראים לך?">
         <div id="grid"></div>
         <label>הערות</label>
-        <textarea id="emp-notes" rows="2"></textarea>
+        <textarea id="emp-notes" rows="2" placeholder="בקשות מיוחדות לשבוע זה..."></textarea>
         <button class="btn" id="submit-btn" onclick="sendAvailability()">שליחת זמינות</button>
     </div>
 
     <div id="manage-section" style="display:none;">
         <h2>ניהול ושיבוץ</h2>
+        <div id="manager-notes" class="notes-area" style="display:none;">
+            <strong style="display:block; margin-bottom:10px; color:#92400E;">📝 הערות עובדים לשבוע זה:</strong>
+            <div id="notes-list"></div>
+        </div>
         <div id="admin-grid"></div>
         <button class="btn" onclick="publishSchedule()" style="background:#1E293B">שמירה ופרסום סידור</button>
         <button class="btn btn-danger" onclick="deletePublishedOnly()">מחיקת פרסום קיים</button>
@@ -92,11 +99,7 @@
     const SUPABASE_KEY = 'sb_publishable_gT4JQDZp04HRGqpQoT7NOQ_i5-wNCB9';
     const DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי'];
     const SHIFTS = ['בוקר','ערב'];
-    let isManager = false;
-    let avail = {};
-    let allSubmissions = [];
-    let currentSchedule = [];
-    let isEditing = false;
+    let isManager = false, avail = {}, allSubmissions = [], currentSchedule = [], isEditing = false;
 
     async function init() {
         if(window.location.hash === '#manager') {
@@ -145,6 +148,14 @@
         allSubmissions = await subRes.json();
         currentSchedule = await schedRes.json();
         renderAdminGrid();
+        renderManagerNotes();
+    }
+
+    function renderManagerNotes() {
+        const list = document.getElementById('notes-list'), area = document.getElementById('manager-notes');
+        const notes = allSubmissions.filter(s => s.notes && s.notes.trim() !== "");
+        if(notes.length) { area.style.display = 'block'; list.innerHTML = notes.map(s => `<div class="note-item"><strong>${s.name}:</strong> ${s.notes}</div>`).join(''); }
+        else { area.style.display = 'none'; }
     }
 
     function renderAdminGrid() {
@@ -159,13 +170,14 @@
                 html += `<div class="manager-row"><div style="font-weight:bold; color:var(--accent)">${s}</div>`;
                 for(let i=1; i<=3; i++) {
                     const currentVal = savedNames[i-1] || "";
+                    const isManual = currentVal && !allSubmissions.some(e => e.name === currentVal);
                     html += `<div class="slot"><select id="sel-${key}-${i}"><option value="">בחר עובד ${i}...</option>`;
                     allSubmissions.forEach(e => {
                         const status = e.availability[key];
                         let icon = status === 'yes' ? '🟢 ' : status === 'maybe' ? '🟡 ' : status === 'no' ? '🔴 ' : '';
                         html += `<option value="${e.name}" ${e.name === currentVal ? 'selected' : ''}>${icon}${e.name}</option>`;
                     });
-                    html += `</select><input type="text" id="manual-${key}-${i}" value="${currentVal && !allSubmissions.some(e=>e.name===currentVal) ? currentVal : ''}" placeholder="שם ידני" style="width:100px;"></div>`;
+                    html += `</select><input type="text" id="manual-${key}-${i}" value="${isManual ? currentVal : ''}" placeholder="שם ידני" style="width:100px;"></div>`;
                 }
                 html += `</div>`;
             });
@@ -177,23 +189,13 @@
     async function loadPublishedSchedule() {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
         currentSchedule = await res.json();
-        if(currentSchedule.length) {
-            document.getElementById('published-box').style.display = 'block';
-            renderPublishedList();
-        }
+        if(currentSchedule.length) { document.getElementById('published-box').style.display = 'block'; renderPublishedList(); }
     }
 
     function renderPublishedList() {
         const list = document.getElementById('schedule-list');
-        if (isEditing) {
-            list.innerHTML = currentSchedule.map(i => `
-                <div style="margin-bottom:8px;">
-                    <strong>יום ${i.day_id} ${i.shift_id}:</strong> 
-                    <input type="text" class="quick-edit-input" data-day="${i.day_id}" data-shift="${i.shift_id}" value="${i.person_name}">
-                </div>`).join('');
-        } else {
-            list.innerHTML = currentSchedule.map(i => `<div><strong>יום ${i.day_id} ${i.shift_id}:</strong> ${i.person_name}</div>`).join('');
-        }
+        if (isEditing) { list.innerHTML = currentSchedule.map(i => `<div style="margin-bottom:8px;"><strong>יום ${i.day_id} ${i.shift_id}:</strong> <input type="text" class="quick-edit-input" data-day="${i.day_id}" data-shift="${i.shift_id}" value="${i.person_name}"></div>`).join(''); }
+        else { list.innerHTML = currentSchedule.map(i => `<div><strong>יום ${i.day_id} ${i.shift_id}:</strong> ${i.person_name}</div>`).join(''); }
     }
 
     function toggleQuickEdit() {
@@ -204,29 +206,15 @@
     }
 
     async function saveQuickEdit() {
-        const inputs = document.querySelectorAll('.quick-edit-input');
-        const updates = Array.from(inputs).map(input => ({
-            day_id: input.dataset.day,
-            shift_id: input.dataset.shift,
-            person_name: input.value,
-            published_at: new Date().toISOString()
-        }));
-
+        const updates = Array.from(document.querySelectorAll('.quick-edit-input')).map(input => ({ day_id: input.dataset.day, shift_id: input.dataset.shift, person_name: input.value, published_at: new Date().toISOString() }));
         await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=neq.-1`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-        await fetch(`${SUPABASE_URL}/rest/v1/schedule`, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify(updates)
-        });
-        alert('הסידור עודכן בהצלחה!');
-        location.reload();
+        await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify(updates) });
+        alert('עודכן!'); location.reload();
     }
 
     async function publishSchedule() {
-        if(!confirm('לפרסם ולנקות את כל הגשות העובדים לשבוע הבא?')) return;
-        
+        if(!confirm('לפרסם ולנקות הגשות?')) return;
         await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=neq.-1`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-        
         const rows = [];
         DAYS.forEach(d => SHIFTS.forEach(s => {
             if (d === 'שישי' && s === 'ערב') return;
@@ -237,38 +225,19 @@
             }
             if(names.length) rows.push({ day_id: d, shift_id: s, person_name: names.join(', '), published_at: new Date().toISOString() });
         }));
-
-        await fetch(`${SUPABASE_URL}/rest/v1/schedule`, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify(rows)
-        });
-
-        await fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { 
-            method: 'DELETE', 
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } 
-        });
-
-        alert('הסידור פורסם והמערכת נוקתה לשבוע הבא!');
-        location.reload();
+        await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify(rows) });
+        await fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+        alert('פורסם והתנקה!'); location.reload();
     }
 
     async function sendAvailability() {
         const name = document.getElementById('emp-name').value.trim();
-        if(!name) return alert('נא להזין שם');
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/shifts`, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, availability: avail, notes: document.getElementById('emp-notes').value, submitted_at: new Date().toISOString() })
-        });
-        if(res.ok) { alert('נשלח בהצלחה!'); location.reload(); }
+        if(!name) return alert('שם חובה');
+        await fetch(`${SUPABASE_URL}/rest/v1/shifts`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name, availability: avail, notes: document.getElementById('emp-notes').value, submitted_at: new Date().toISOString() }) });
+        alert('נשלח!'); location.reload();
     }
 
-    async function deletePublishedOnly() {
-        if(!confirm('למחוק את הפרסום הקיים?')) return;
-        await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-        location.reload();
-    }
+    async function deletePublishedOnly() { if(confirm('למחוק פרסום?')) { await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); location.reload(); } }
 
     init();
 </script>
