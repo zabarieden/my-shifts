@@ -3,24 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>סידור משמרות - עדן</title>
+<title> סידור משמרות </title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #F8FAFC; /* רקע בהיר מאוד */
+  --bg: #FDF5E6; /* צבע שמנת עדין לרקע */
   --surface: #ffffff;
-  --accent: #4F86F7; /* כחול שמיים (כמו בתמונה) */
-  --accent-light: #E0E7FF; /* תכלת עדין לרקע */
-  --accent-text: #1E40AF;
-  --warn: #F59E0B;
+  --accent: #2D6A4F; /* ירוק עמוק לכותרות */
+  --accent-light: #D8F3DC; /* ירוק בהיר מאוד */
+  --accent-text: #1B4332;
+  --warn: #F59E0B; /* כתום */
   --warn-light: #FEF3C7;
-  --danger: #EF4444;
+  --danger: #EF4444; /* אדום */
   --danger-light: #FEE2E2;
   --text: #1E293B;
   --muted: #64748B;
-  --border: #E2E8F0; /* קווים עדינים (כמו בתמונה) */
-  --r: 8px;
-  --sh: 0 1px 3px rgba(0,0,0,0.1);
+  --border: #E5E0D8;
+  --r: 12px;
+  --sh: 0 4px 6px -1px rgba(0,0,0,0.1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl;line-height:1.6}
@@ -32,32 +32,40 @@ header{background:var(--accent);color:white;padding:15px 20px;display:flex;align
 .tab.active{background:white;color:var(--accent);font-weight:600}
 
 main{max-width:700px;margin:20px auto;padding:0 15px}
-.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:20px;margin-bottom:15px;box-shadow:var(--sh)}
-.card-title{font-size:16px;font-weight:600;margin-bottom:15px;color:var(--accent);border-bottom:2px solid var(--accent-light);padding-bottom:8px}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:25px;margin-bottom:15px;box-shadow:var(--sh)}
+.card-title{font-size:18px;font-weight:700;margin-bottom:10px;color:var(--accent)}
 
-label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px;margin-top:15px;font-weight:500}
-input[type=text],textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;font-family:inherit}
+/* מקרא צבעים */
+.legend {display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border);}
+.legend-item {display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;}
+.dot {width: 12px; height: 12px; border-radius: 50%;}
+
+label{font-size:14px;color:var(--text);display:block;margin-bottom:6px;margin-top:20px;font-weight:600}
+input[type=text],textarea{width:100%;padding:12px;border:2px solid var(--border);border-radius:8px;outline:none;font-family:inherit;font-size:15px}
 input:focus{border-color:var(--accent)}
 
-.day-block{margin-bottom:12px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.day-lbl{background:var(--accent-light);padding:5px 12px;font-size:12px;font-weight:700;color:var(--accent-text)}
-.srow{display:flex;background:white}
-.sc{flex:1;padding:12px;text-align:center;cursor:pointer;border-left:1px solid var(--border);transition:0.15s}
+.day-block{margin-bottom:15px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background: white;}
+.day-lbl{background: #f1f5f9;padding:8px 15px;font-size:14px;font-weight:700;color:var(--accent-text);border-bottom:1px solid var(--border)}
+.srow{display:flex;}
+.sc{flex:1;padding:15px;text-align:center;cursor:pointer;border-left:1px solid var(--border);transition:0.15s;font-weight:500;background: #fff;}
 .sc:last-child{border-left:none}
-.sc.yes{background:#DBEAFE;color:#1E40AF;font-weight:600} /* כחול עדין */
-.sc.maybe{background:#FEF9C3;color:#854D0E}
-.sc.no{background:#FEE2E2;color:#991B1B}
 
-.btn{padding:12px;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;width:100%;border:none;margin-top:20px;transition:0.2s}
+/* סטטוסים - ירוק ראשון */
+.sc.yes{background:#D8F3DC;color:#1B4332;border-bottom: 4px solid #2D6A4F;} 
+.sc.maybe{background:#FEF3C7;color:#92400E;border-bottom: 4px solid #F59E0B;}
+.sc.no{background:#FEE2E2;color:#991B1B;border-bottom: 4px solid #EF4444;}
+.sc.none{background: #fff;}
+
+.btn{padding:14px;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;width:100%;border:none;margin-top:25px;transition:0.2s}
 .btn-green{background:var(--accent);color:white}
 .btn-green:hover{filter:brightness(1.1)}
 
-.sub-card{background:white;border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px}
-.sched-row{background:white;border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.sched-select{padding:6px;border-radius:4px;border:1px solid var(--border)}
+.sub-card{background:white;border:1px solid var(--border);border-radius:8px;padding:15px;margin-bottom:10px;box-shadow: 0 2px 4px rgba(0,0,0,0.05)}
+.sched-row{background:white;border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sched-select{padding:8px;border-radius:6px;border:2px solid var(--border);font-family: inherit;}
 
-.pub-row{border-radius:6px;padding:10px;margin-bottom:5px;display:flex;justify-content:space-between;border:1px solid var(--border);background:white}
-.pub-row.yes{border-right:4px solid var(--accent)}
+.pub-row{border-radius:8px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;border:1px solid var(--border);background:white;box-shadow: 0 1px 2px rgba(0,0,0,0.05)}
+.pub-row.yes{border-right:5px solid var(--accent)}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -76,32 +84,41 @@ input:focus{border-color:var(--accent)}
 <div id="tab-team">
   <div class="card">
     <div class="card-title">הגשת זמינות לשבוע הבא</div>
-    <label>שם העובד/ת</label>
+    <p style="font-size: 13px; color: var(--muted); margin-bottom: 15px;">אנא מלאו את שמכם וסמנו זמינות לכל משמרת.</p>
+
+    <!-- מקרא הצבעים -->
+    <div class="legend">
+        <div class="legend-item"><div class="dot" style="background:#2D6A4F"></div>יכול/ה</div>
+        <div class="legend-item"><div class="dot" style="background:#F59E0B"></div>אפשרי (עדיפות שלא)</div>
+        <div class="legend-item"><div class="dot" style="background:#EF4444"></div>לא יכול/ה</div>
+    </div>
+
+    <label>שם העובד/ת *</label>
     <input type="text" id="emp-name" placeholder="הקלידו שם מלא...">
     
-    <label style="margin-top:20px">זמינות (לחצו לשינוי):</label>
+    <label>זמינות (לחצו על המשמרת לשינוי):</label>
     <div id="shifts-builder"></div>
 
     <label>הערות נוספות</label>
-    <textarea id="emp-notes" rows="2"></textarea>
-    <button class="btn btn-green" id="submit-btn" onclick="submitForm()">שליחת זמינות</button>
+    <textarea id="emp-notes" rows="2" placeholder="אילוצים מיוחדים, בקשות וכו'..."></textarea>
+    <button class="btn btn-green" id="submit-btn" onclick="submitForm()">שליחת זמינות למערכת</button>
   </div>
 
   <div id="team-schedule" hidden>
     <div class="card">
-      <div class="card-title">📋 הסידור הסופי שפורסם</div>
+      <div class="card-title">📋 סידור העבודה שפורסם</div>
       <div id="team-pub-grid"></div>
     </div>
   </div>
 </div>
 
 <div id="tab-subs" hidden>
-  <div class="card-title">הגשות שהתקבלו מהצוות</div>
+  <div class="card-title">הגשות שהתקבלו</div>
   <div id="subs-list"></div>
 </div>
 
 <div id="tab-build" hidden>
-  <div class="card-title">בניית סידור עבודה</div>
+  <div class="card-title">שיבוץ סידור עבודה</div>
   <div id="build-area"></div>
 </div>
 </main>
@@ -138,6 +155,7 @@ function buildGrid() {
 }
 
 function toggle(k) {
+  // סדר הסטטוסים: לבן -> ירוק -> כתום -> אדום
   const states = ['none','yes','maybe','no'];
   avail[k] = states[(states.indexOf(avail[k])+1)%states.length];
   document.getElementById('sc-'+k).className = 'sc '+avail[k];
@@ -145,10 +163,6 @@ function toggle(k) {
 
 function showTab(t) {
   ['team','subs','build'].forEach(x => document.getElementById('tab-'+x).hidden = (x!==t));
-  const tabs = document.querySelectorAll('.tab');
-  tabs[0].className = t==='team' ? 'tab active' : 'tab';
-  tabs[1].className = t==='subs' ? 'tab active' : 'tab';
-  tabs[2].className = t==='build' ? 'tab active' : 'tab';
   if(t==='subs') loadSubs();
   if(t==='build') loadBuild();
 }
@@ -156,14 +170,14 @@ function showTab(t) {
 async function submitForm() {
   const name = document.getElementById('emp-name').value;
   const notes = document.getElementById('emp-notes').value;
-  if(!name) return alert('נא להכניס שם');
+  if(!name) return alert('נא להכניס שם מלא');
   
   const res = await fetch(`${SUPABASE_URL}/rest/v1/shifts`, {
     method: 'POST',
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, availability: avail, notes, submitted_at: new Date() })
   });
-  if(res.ok) { alert('הזמינות נשלחה בהצלחה!'); location.reload(); }
+  if(res.ok) { alert('הזמינות שלך נשלחה בהצלחה לעדן!'); location.reload(); }
 }
 
 async function loadPublished() {
