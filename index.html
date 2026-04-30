@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>סידור משמרות - עדן</title>
+<title>סידור משמרות</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #FDF5E6; /* צבע שמנת עדין ובהיר */
+  --bg: #FDF5E6; /* שמנת */
   --surface: #ffffff;
-  --accent: #2D6A4F; /* ירוק עמוק יוקרתי */
-  --accent-light: #D8F3DC; /* ירוק בהיר למשמרות */
+  --accent: #2D6A4F; /* ירוק */
+  --accent-light: #D8F3DC;
   --accent-text: #1B4332;
-  --warn: #F59E0B; /* כתום עדין */
+  --warn: #F59E0B; /* כתום */
   --warn-light: #FEF3C7;
-  --danger: #EF4444; /* אדום עדין */
+  --danger: #EF4444; /* אדום */
   --danger-light: #FEE2E2;
-  --text: #334155; /* טקסט כהה וקריא */
+  --text: #334155;
   --muted: #64748B;
   --border: #E2E8F0;
   --r: 12px;
@@ -50,7 +50,6 @@ input:focus{border-color:var(--accent);box-shadow: 0 0 0 3px var(--accent-light)
 .sc{flex:1;padding:16px;text-align:center;cursor:pointer;border-left:1px solid var(--border);transition:all 0.2s;font-weight:600;color:var(--muted);background: #fff;}
 .sc:last-child{border-left:none}
 
-/* לחיצה ראשונה ירוקה */
 .sc.yes{background:var(--accent-light);color:var(--accent-text);border-bottom: 4px solid var(--accent);} 
 .sc.maybe{background:var(--warn-light);color:#92400E;border-bottom: 4px solid var(--warn);}
 .sc.no{background:var(--danger-light);color:#991B1B;border-bottom: 4px solid var(--danger);}
@@ -71,7 +70,8 @@ input:focus{border-color:var(--accent);box-shadow: 0 0 0 3px var(--accent-light)
 <body>
 
 <header>
-  <div class="logo">סידור משמרות <span>/ עדן</span></div>
+  <!-- הנה השינוי בכותרת -->
+  <div class="logo">סידור משמרות</div>
   <div class="tabs" id="tab-bar" hidden>
     <button class="tab" onclick="showTab('team')">טופס</button>
     <button class="tab" onclick="showTab('subs')">הגשות</button>
@@ -99,7 +99,7 @@ input:focus{border-color:var(--accent);box-shadow: 0 0 0 3px var(--accent-light)
 
     <label>הערות</label>
     <textarea id="emp-notes" rows="2" placeholder="בקשות מיוחדות..."></textarea>
-    <button class="btn btn-green" id="submit-btn" onclick="submitForm()">שליחה לעדן</button>
+    <button class="btn btn-green" id="submit-btn" onclick="submitForm()">שליחה</button>
   </div>
 
   <div id="team-schedule" hidden>
