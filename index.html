@@ -68,9 +68,9 @@
 
     <div id="manage-section" style="display:none;">
         <h2>ניהול ושיבוץ</h2>
-        <p style="text-align:center; font-size:12px; margin-bottom:10px;">הערה: הסידור הקיים נטען אוטומטית לעריכה</p>
+        <p style="text-align:center; font-size:12px; margin-bottom:10px;">ניתן לערוך את השיבוצים ולפרסם מחדש</p>
         <div id="admin-grid"></div>
-        <button class="btn" onclick="publishSchedule()" style="background:#1E293B">פרסום סידור מעודכן</button>
+        <button class="btn" onclick="publishSchedule()" style="background:#1E293B">שמירה ופרסום סידור</button>
         <button class="btn btn-danger" onclick="deletePublishedOnly()">מחיקת פרסום קיים</button>
     </div>
 </div>
@@ -99,6 +99,7 @@
         DAYS.forEach(d => {
             html += `<div class="day-block"><div class="day-lbl">${d}</div><div class="srow">`;
             SHIFTS.forEach(s => {
+                if (d === 'שישי' && s === 'ערב') return; // הסרת שישי ערב
                 const k = `${d}_${s}`; avail[k] = 'none';
                 html += `<div class="sc" id="${k}" onclick="toggle('${k}')">${s}</div>`;
             });
@@ -135,6 +136,7 @@
         DAYS.forEach(d => {
             html += `<div class="day-block"><div class="day-lbl">${d}</div>`;
             SHIFTS.forEach(s => {
+                if (d === 'שישי' && s === 'ערב') return; // הסרת שישי ערב
                 const key = `${d}_${s}`;
                 const savedData = currentSchedule.find(i => i.day_id === d && i.shift_id === s);
                 const savedNames = savedData ? savedData.person_name.split(', ') : [];
@@ -150,9 +152,7 @@
                         let icon = "";
                         if(status === 'yes') icon = "🟢 ";
                         if(status === 'maybe') icon = "🟡 ";
-                        if(status === 'no') icon = "🔴 "; // סימון "לא יכול" נוסף כאן
-                        
-                        // כאן המנהלת תראה את כולם, כולל את מי שסימן "לא יכול"
+                        if(status === 'no') icon = "🔴 ";
                         const isSelected = e.name === currentVal ? 'selected' : '';
                         html += `<option value="${e.name}" ${isSelected}>${icon}${e.name}</option>`;
                     });
@@ -168,10 +168,11 @@
     }
 
     async function publishSchedule() {
-        if(!confirm('לעדכן את הפרסום ולנקות הגשות חדשות?')) return;
+        if(!confirm('לפרסם ולעדכן את הסידור?')) return;
         await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=neq.-1`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
         const rows = [];
         DAYS.forEach(d => SHIFTS.forEach(s => {
+            if (d === 'שישי' && s === 'ערב') return;
             let names = [];
             for(let i=1; i<=3; i++) {
                 const n = document.getElementById(`manual-${d}_${s}-${i}`).value.trim() || document.getElementById(`sel-${d}_${s}-${i}`).value;
@@ -184,11 +185,7 @@
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(rows)
         });
-        if(res.ok) {
-            await fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-            alert('הסידור עודכן בהצלחה!');
-            location.reload();
-        }
+        if(res.ok) { alert('הסידור פורסם בהצלחה!'); location.reload(); }
     }
 
     async function sendAvailability() {
