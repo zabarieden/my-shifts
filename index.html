@@ -7,59 +7,57 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #F7F5F2;
-  --surface: #fff;
-  --accent: #1E3A8A; /* כחול עמוק */
-  --accent-light: #E0F2FE; /* תכלת בהיר */
-  --accent-text: #1e3a8a;
-  --warn: #d97706;
+  --bg: #F8FAFC; /* רקע בהיר מאוד */
+  --surface: #ffffff;
+  --accent: #4F86F7; /* כחול שמיים (כמו בתמונה) */
+  --accent-light: #E0E7FF; /* תכלת עדין לרקע */
+  --accent-text: #1E40AF;
+  --warn: #F59E0B;
   --warn-light: #FEF3C7;
-  --warn-text: #92400e;
-  --danger: #DC2626;
+  --danger: #EF4444;
   --danger-light: #FEE2E2;
-  --danger-text: #7f1d1d;
-  --text: #1A1A1A;
-  --muted: #6B6B6B;
-  --border: #E5E0D8;
-  --r: 12px;
-  --sh: 0 2px 12px rgba(0,0,0,0.07);
+  --text: #1E293B;
+  --muted: #64748B;
+  --border: #E2E8F0; /* קווים עדינים (כמו בתמונה) */
+  --r: 8px;
+  --sh: 0 1px 3px rgba(0,0,0,0.1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;direction:rtl;line-height:1.6}
 
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100}
-.logo{font-size:17px;font-weight:700;color:var(--accent)}
-.tabs{display:flex;gap:3px;background:var(--bg);border-radius:9px;padding:3px}
-.tab{padding:6px 14px;border:none;background:none;border-radius:7px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);transition:all .15s}
-.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+header{background:var(--accent);color:white;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh)}
+.logo{font-size:18px;font-weight:700}
+.tabs{display:flex;gap:5px;background:rgba(255,255,255,0.2);border-radius:6px;padding:3px}
+.tab{padding:6px 12px;border:none;background:none;border-radius:4px;color:white;font-size:13px;cursor:pointer;transition:0.2s}
+.tab.active{background:white;color:var(--accent);font-weight:600}
 
-main{max-width:660px;margin:0 auto;padding:24px 16px}
-.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:22px;margin-bottom:14px;box-shadow:var(--sh)}
-.card-title{font-size:16px;font-weight:600;margin-bottom:3px}
+main{max-width:700px;margin:20px auto;padding:0 15px}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:20px;margin-bottom:15px;box-shadow:var(--sh)}
+.card-title{font-size:16px;font-weight:600;margin-bottom:15px;color:var(--accent);border-bottom:2px solid var(--accent-light);padding-bottom:8px}
 
-label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px;margin-top:14px;font-weight:500}
-input[type=text],textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;font-family:'Heebo',sans-serif;font-size:14px;outline:none}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px;margin-top:15px;font-weight:500}
+input[type=text],textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;font-family:inherit}
+input:focus{border-color:var(--accent)}
 
-.day-block{margin-bottom:8px}
-.day-lbl{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
-.srow{display:flex;gap:7px}
-.sc{flex:1;padding:12px 5px;border:1.5px solid var(--border);border-radius:9px;text-align:center;cursor:pointer;background:var(--bg);transition:all .15s}
-.sc.yes{background:#86efac;border-color:#166534;color:#064e3b}
-.sc.maybe{background:#fef08a;border-color:#854d0e;color:#713f12}
-.sc.no{background:#fca5a5;border-color:#991b1b;color:#7f1d1d}
+.day-block{margin-bottom:12px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.day-lbl{background:var(--accent-light);padding:5px 12px;font-size:12px;font-weight:700;color:var(--accent-text)}
+.srow{display:flex;background:white}
+.sc{flex:1;padding:12px;text-align:center;cursor:pointer;border-left:1px solid var(--border);transition:0.15s}
+.sc:last-child{border-left:none}
+.sc.yes{background:#DBEAFE;color:#1E40AF;font-weight:600} /* כחול עדין */
+.sc.maybe{background:#FEF9C3;color:#854D0E}
+.sc.no{background:#FEE2E2;color:#991B1B}
 
-.btn{padding:12px;border-radius:9px;font-family:'Heebo',sans-serif;font-size:15px;font-weight:600;cursor:pointer;width:100%;border:none;margin-top:18px}
-.btn-green{background:var(--accent);color:#fff}
+.btn{padding:12px;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;width:100%;border:none;margin-top:20px;transition:0.2s}
+.btn-green{background:var(--accent);color:white}
+.btn-green:hover{filter:brightness(1.1)}
 
-#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:#111;color:#fff;padding:11px 22px;border-radius:99px;transition:transform .3s;z-index:999}
-#toast.show{transform:translateX(-50%) translateY(0)}
+.sub-card{background:white;border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px}
+.sched-row{background:white;border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.sched-select{padding:6px;border-radius:4px;border:1px solid var(--border)}
 
-.sub-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px}
-.sched-row{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.sched-select{flex:1;padding:8px;border-radius:7px;border:1px solid var(--border)}
-
-.pub-row{border-radius:9px;padding:11px;margin-bottom:5px;display:flex;justify-content:space-between;border:1px solid var(--border)}
-.pub-row.yes{background:#dcfce7}.pub-row.maybe{background:#fef9c3}.pub-row.no{background:#fee2e2}
+.pub-row{border-radius:6px;padding:10px;margin-bottom:5px;display:flex;justify-content:space-between;border:1px solid var(--border);background:white}
+.pub-row.yes{border-right:4px solid var(--accent)}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -68,59 +66,52 @@ input[type=text],textarea{width:100%;padding:9px 11px;border:1px solid var(--bor
 <header>
   <div class="logo">סידור משמרות <span>/ עדן</span></div>
   <div class="tabs" id="tab-bar" hidden>
-    <button class="tab" onclick="showTab('team')">טופס הגשה</button>
+    <button class="tab" onclick="showTab('team')">טופס</button>
     <button class="tab" onclick="showTab('subs')">הגשות</button>
-    <button class="tab active" onclick="showTab('build')">בניית סידור</button>
+    <button class="tab active" onclick="showTab('build')">בנייה</button>
   </div>
 </header>
 
-<div id="toast"></div>
-
 <main>
 <div id="tab-team">
-  <div id="pub-banner" class="card" style="background:var(--accent-light); border-color:var(--accent); font-weight:600" hidden>
-    ✅ הסידור לשבוע הקרוב פורסם! (ראה למטה)
-  </div>
-
   <div class="card">
-    <div class="card-title">הגשת זמינות</div>
-    <label>שם מלא</label>
-    <input type="text" id="emp-name" placeholder="הכנס שם...">
+    <div class="card-title">הגשת זמינות לשבוע הבא</div>
+    <label>שם העובד/ת</label>
+    <input type="text" id="emp-name" placeholder="הקלידו שם מלא...">
     
-    <label style="margin-top:20px">לחץ על משמרת לשינוי סטטוס:</label>
+    <label style="margin-top:20px">זמינות (לחצו לשינוי):</label>
     <div id="shifts-builder"></div>
 
-    <label>הערות</label>
-    <textarea id="emp-notes"></textarea>
-    <button class="btn btn-green" id="submit-btn" onclick="submitForm()">אישור ושליחה</button>
+    <label>הערות נוספות</label>
+    <textarea id="emp-notes" rows="2"></textarea>
+    <button class="btn btn-green" id="submit-btn" onclick="submitForm()">שליחת זמינות</button>
   </div>
 
   <div id="team-schedule" hidden>
     <div class="card">
-      <div class="card-title">📋 הסידור הסופי</div>
+      <div class="card-title">📋 הסידור הסופי שפורסם</div>
       <div id="team-pub-grid"></div>
     </div>
   </div>
 </div>
 
 <div id="tab-subs" hidden>
-  <div class="card-title">הגשות שהתקבלו</div>
+  <div class="card-title">הגשות שהתקבלו מהצוות</div>
   <div id="subs-list"></div>
 </div>
 
 <div id="tab-build" hidden>
-  <div class="card-title">בניית סידור סופי</div>
+  <div class="card-title">בניית סידור עבודה</div>
   <div id="build-area"></div>
 </div>
 </main>
 
 <script>
-// החיבור שלך ל-Supabase
 const SUPABASE_URL = 'https://bkqggppgusfvufyfmndv.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_gT4JQDZp04HRGqpQoT7NOQ_i5-wNCB9';
 
 const DAYS = [{id:'sun',label:'ראשון'},{id:'mon',label:'שני'},{id:'tue',label:'שלישי'},{id:'wed',label:'רביעי'},{id:'thu',label:'חמישי'},{id:'fri',label:'שישי'}];
-const SHIFTS = [{id:'m',label:'בוקר'},{id:'e',label:'ערב'}];
+const SHIFTS = [{id:'בוקר',label:'בוקר'},{id:'ערב',label:'ערב'}];
 let avail = {};
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -139,7 +130,7 @@ function buildGrid() {
     SHIFTS.forEach(s => {
       const k = `${d.id}_${s.id}`;
       avail[k] = 'none';
-      html += `<div class="sc none" id="sc-${k}" onclick="toggle('${k}')"><b>${s.label}</b></div>`;
+      html += `<div class="sc none" id="sc-${k}" onclick="toggle('${k}')">${s.label}</div>`;
     });
     html += `</div></div>`;
   });
@@ -154,20 +145,25 @@ function toggle(k) {
 
 function showTab(t) {
   ['team','subs','build'].forEach(x => document.getElementById('tab-'+x).hidden = (x!==t));
+  const tabs = document.querySelectorAll('.tab');
+  tabs[0].className = t==='team' ? 'tab active' : 'tab';
+  tabs[1].className = t==='subs' ? 'tab active' : 'tab';
+  tabs[2].className = t==='build' ? 'tab active' : 'tab';
   if(t==='subs') loadSubs();
   if(t==='build') loadBuild();
 }
 
 async function submitForm() {
   const name = document.getElementById('emp-name').value;
+  const notes = document.getElementById('emp-notes').value;
   if(!name) return alert('נא להכניס שם');
   
   const res = await fetch(`${SUPABASE_URL}/rest/v1/shifts`, {
     method: 'POST',
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, availability: avail, submitted_at: new Date() })
+    body: JSON.stringify({ name, availability: avail, notes, submitted_at: new Date() })
   });
-  if(res.ok) { alert('נשלח בהצלחה!'); location.reload(); }
+  if(res.ok) { alert('הזמינות נשלחה בהצלחה!'); location.reload(); }
 }
 
 async function loadPublished() {
@@ -177,12 +173,11 @@ async function loadPublished() {
   const data = await r.json();
   if(data.length > 0) {
     document.getElementById('team-schedule').hidden = false;
-    document.getElementById('pub-banner').hidden = false;
     let html = '';
     data.forEach(s => {
-      html += `<div class="pub-row ${s.avail_status}">
-        <span>${s.day_id} - ${s.shift_id}</span>
-        <b>${s.person_name}</b>
+      html += `<div class="pub-row yes">
+        <span><b>${s.day_id} ${s.shift_id}</b></span>
+        <span>${s.person_name}</span>
       </div>`;
     });
     document.getElementById('team-pub-grid').innerHTML = html;
@@ -190,13 +185,13 @@ async function loadPublished() {
 }
 
 async function loadSubs() {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/shifts?select=*`, {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/shifts?select=*&order=submitted_at.desc`, {
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
   });
   const data = await r.json();
   let html = '';
   data.forEach(sub => {
-    html += `<div class="sub-card"><b>${sub.name}</b><br><small>${sub.notes || ''}</small></div>`;
+    html += `<div class="sub-card"><b>${sub.name}</b><br><small style="color:var(--muted)">${sub.notes || 'אין הערות'}</small></div>`;
   });
   document.getElementById('subs-list').innerHTML = html;
 }
@@ -221,7 +216,7 @@ async function loadBuild() {
       </div>`;
     });
   });
-  html += `<button class="btn btn-green" onclick="publish()">פרסם סידור סופי</button>`;
+  html += `<button class="btn btn-green" onclick="publish()">פרסום סידור סופי</button>`;
   document.getElementById('build-area').innerHTML = html;
 }
 
@@ -233,13 +228,13 @@ async function publish() {
     if(name) rows.push({ day_id: d.label, shift_id: s.label, person_name: name, published_at: new Date() });
   }));
 
-  await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+  await fetch(`${SUPABASE_URL}/rest/v1/schedule?day_id=not.is.null`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
   const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, {
     method: 'POST',
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(rows)
   });
-  if(res.ok) alert('הסידור פורסם בהצלחה!');
+  if(res.ok) alert('הסידור פורסם בהצלחה לצוות!');
 }
 </script>
 </body>
