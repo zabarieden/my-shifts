@@ -9,14 +9,14 @@
         :root { --bg: #FDF5E6; --surface: #ffffff; --accent: #2D6A4F; --accent-light: #D8F3DC; --text: #334155; --border: #E2E8F0; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); direction: rtl; padding: 20px; min-height: 100vh; }
-        .card { background: var(--surface); border-radius: 12px; padding: 25px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .card { background: var(--surface); border-radius: 12px; padding: 25px; max-width: 700px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border); }
         .tabs { display: none; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .tab-btn { padding: 10px 20px; border: none; background: none; font-weight: 700; cursor: pointer; color: #94a3b8; }
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
         h2 { color: var(--accent); margin-bottom: 20px; text-align: center; }
         label { display: block; margin: 15px 0 5px; font-weight: 700; font-size: 14px; }
-        input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; font-family: inherit; font-size: 15px; }
-        .day-block { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; background: #fff; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 5px; font-family: inherit; font-size: 14px; }
+        .day-block { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; overflow: hidden; background: #fff; }
         .day-lbl { background: #f1f5f9; padding: 10px; font-weight: 800; font-size: 14px; border-bottom: 1px solid var(--border); }
         .srow { display: flex; }
         .sc { flex: 1; padding: 18px; text-align: center; cursor: pointer; border-left: 1px solid var(--border); font-weight: 700; color: #64748B; transition: 0.2s; }
@@ -25,13 +25,9 @@
         .sc.maybe { background: #FEF3C7; color: #92400E; border-bottom: 4px solid #F59E0B; }
         .sc.no { background: #FEE2E2; color: #991B1B; border-bottom: 4px solid #EF4444; }
         .btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 18px; margin-top: 15px; }
-        .btn:disabled { background: #ccc; }
-        .manager-row { display: flex; flex-direction: column; padding: 12px; border-bottom: 1px solid #eee; background: #fafafa; }
-        .manager-row:last-child { border-bottom: none; }
-        .shift-title { font-weight: 800; color: var(--accent); margin-bottom: 8px; font-size: 14px; }
-        .input-group { display: flex; gap: 8px; }
-        .input-group select { flex: 2; margin-bottom: 0; }
-        .input-group input { flex: 1; margin-bottom: 0; }
+        .manager-row { padding: 12px; border-bottom: 1px solid #eee; background: #fafafa; }
+        .shift-title { font-weight: 800; color: var(--accent); margin-bottom: 10px; }
+        .slot { display: flex; gap: 5px; margin-bottom: 8px; align-items: center; }
         #published-box { margin-top: 20px; padding: 15px; background: #E0F2FE; border-radius: 10px; border: 1px solid #7DD3FC; display: none; }
     </style>
 </head>
@@ -43,7 +39,6 @@
         <button id="btn-manage" class="tab-btn" onclick="switchTab('manage')">בניית סידור</button>
     </div>
 
-    <!-- צד עובדים -->
     <div id="submit-section">
         <h2 id="form-title">סידור משמרות</h2>
         <div id="published-box">
@@ -54,14 +49,12 @@
         <input type="text" id="emp-name" placeholder="איך קוראים לך?">
         <div id="grid"></div>
         <label>הערות</label>
-        <textarea id="emp-notes" rows="2" placeholder="בקשות מיוחדות..."></textarea>
+        <textarea id="emp-notes" rows="2"></textarea>
         <button class="btn" id="submit-btn" onclick="sendAvailability()">שליחת זמינות</button>
     </div>
 
-    <!-- צד מנהלת בלבד -->
     <div id="manage-section" style="display:none;">
-        <h2>ניהול ושיבוץ</h2>
-        <p style="font-size: 13px; text-align: center; margin-bottom: 20px; color: #64748b;">בחרי עובד מהרשימה או הקלידי שם ידנית בתיבה הקטנה</p>
+        <h2>ניהול ושיבוץ (עד 3 למשמרת)</h2>
         <div id="admin-grid"></div>
         <button class="btn" onclick="publishSchedule()" style="background:#1E293B">פרסום סידור סופי</button>
     </div>
@@ -79,7 +72,7 @@
         if(window.location.hash === '#manager') {
             document.getElementById('manager-tabs').style.display = 'flex';
             loadSubmissions();
-            switchTab('manage'); // כניסה ישירה לניהול כשנמצאים בקישור מנהלת
+            switchTab('manage');
         }
         
         let html = '';
@@ -120,7 +113,7 @@
             body: JSON.stringify({ name, availability: avail, notes: document.getElementById('emp-notes').value, submitted_at: new Date().toISOString() })
         });
 
-        if(res.ok) { alert('הזמינות נשלחה בהצלחה!'); location.reload(); }
+        if(res.ok) { alert('נשלח בהצלחה!'); location.reload(); }
         else alert('שגיאה בשליחה');
         btn.disabled = false;
     }
@@ -139,23 +132,24 @@
             html += `<div class="day-block"><div class="day-lbl">${d}</div>`;
             SHIFTS.forEach(s => {
                 const key = `${d}_${s}`;
-                html += `
-                <div class="manager-row">
-                    <div class="shift-title">${s}</div>
-                    <div class="input-group">
-                        <select id="sel-${key}" onchange="document.getElementById('manual-${key}').value=''">
-                            <option value="">מי הגיש? (בחר/י)</option>`;
-                allSubmissions.forEach(emp => {
-                    const status = emp.availability[key] || 'none';
-                    if(status !== 'no' && status !== 'none') {
-                        html += `<option value="${emp.name}">${emp.name} (${status === 'yes' ? 'יכול' : 'אפשרי'})</option>`;
-                    }
-                });
-                html += `
+                html += `<div class="manager-row"><div class="shift-title">${s}</div>`;
+                for(let i=1; i<=3; i++) {
+                    html += `
+                    <div class="slot">
+                        <select id="sel-${key}-${i}">
+                            <option value="">בחר עובד ${i}...</option>`;
+                    allSubmissions.forEach(emp => {
+                        const status = emp.availability[key] || 'none';
+                        if(status !== 'no' && status !== 'none') {
+                            html += `<option value="${emp.name}">${emp.name} (${status === 'yes' ? 'יכול' : 'אפשרי'})</option>`;
+                        }
+                    });
+                    html += `
                         </select>
-                        <input type="text" id="manual-${key}" placeholder="או שם ידני..." oninput="document.getElementById('sel-${key}').value=''">
-                    </div>
-                </div>`;
+                        <input type="text" id="manual-${key}-${i}" placeholder="או שם ידני..." style="width:120px;">
+                    </div>`;
+                }
+                html += `</div>`;
             });
             html += `</div>`;
         });
@@ -163,7 +157,7 @@
     }
 
     async function publishSchedule() {
-        if(!confirm('לפרסם את הסידור?')) return;
+        if(!confirm('לפרסם סידור?')) return;
         
         await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, {
             method: 'DELETE',
@@ -174,12 +168,13 @@
         DAYS.forEach(d => {
             SHIFTS.forEach(s => {
                 const key = `${d}_${s}`;
-                const selName = document.getElementById(`sel-${key}`).value;
-                const manualName = document.getElementById(`manual-${key}`).value.trim();
-                const finalName = manualName || selName;
-
-                if(finalName) {
-                    rows.push({ day_id: d, shift_id: s, person_name: finalName, published_at: new Date().toISOString() });
+                let names = [];
+                for(let i=1; i<=3; i++) {
+                    const final = document.getElementById(`manual-${key}-${i}`).value.trim() || document.getElementById(`sel-${key}-${i}`).value;
+                    if(final) names.push(final);
+                }
+                if(names.length > 0) {
+                    rows.push({ day_id: d, shift_id: s, person_name: names.join(', '), published_at: new Date().toISOString() });
                 }
             });
         });
@@ -190,7 +185,7 @@
             body: JSON.stringify(rows)
         });
 
-        if(res.ok) { alert('הסידור פורסם בהצלחה!'); location.hash = ''; location.reload(); }
+        if(res.ok) { alert('פורסם בהצלחה!'); location.hash = ''; location.reload(); }
         else alert('שגיאה בפרסום');
     }
 
@@ -203,17 +198,7 @@
             const box = document.getElementById('published-box');
             const list = document.getElementById('schedule-list');
             box.style.display = 'block';
-            
-            // ארגון התצוגה לפי ימים
-            const sorted = {};
-            data.forEach(item => {
-                if(!sorted[item.day_id]) sorted[item.day_id] = [];
-                sorted[item.day_id].push(`${item.shift_id}: ${item.person_name}`);
-            });
-            
-            list.innerHTML = Object.entries(sorted).map(([day, shifts]) => 
-                `<div><strong>יום ${day}:</strong> ${shifts.join(' | ')}</div>`
-            ).join('');
+            list.innerHTML = data.map(i => `<div><strong>יום ${i.day_id} ${i.shift_id}:</strong> ${i.person_name}</div>`).join('');
         }
     }
 
