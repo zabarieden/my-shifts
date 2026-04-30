@@ -6,116 +6,42 @@
 <title>סידור משמרות</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #FDF5E6; /* שמנת עדין */
-  --surface: #ffffff;
-  --accent: #2D6A4F; /* ירוק עמוק */
-  --accent-light: #D8F3DC;
-  --text: #334155;
-  --muted: #64748B;
-  --border: #E2E8F0;
-  --r: 12px;
-}
+:root { --bg: #FDF5E6; --surface: #ffffff; --accent: #2D6A4F; --accent-light: #D8F3DC; --text: #334155; --border: #E2E8F0; }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;min-height:100vh}
-
-header{background:var(--accent);color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-.logo{font-size:18px;font-weight:800}
-
-/* טאבים למנהלת בלבד */
-.tabs{display:none;gap:5px;background:rgba(255,255,255,0.2);border-radius:8px;padding:4px}
-.tab{padding:6px 12px;border:none;background:none;border-radius:6px;color:white;font-size:13px;cursor:pointer;font-family:inherit}
-.tab.active{background:white;color:var(--accent);font-weight:700}
-
-main{max-width:600px;margin:25px auto;padding:0 15px}
-.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:25px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
-.card-title{font-size:20px;font-weight:800;margin-bottom:15px;color:var(--accent)}
-
-.legend {display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border);}
-.legend-item {display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;}
-.dot {width: 12px; height: 12px; border-radius: 50%}
-
-label{font-size:14px;display:block;margin-bottom:6px;margin-top:20px;font-weight:700}
-input[type=text],textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;outline:none;font-family:inherit;font-size:15px}
-
-.day-block{margin-bottom:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff}
-.day-lbl{background:#f1f5f9;padding:10px;font-size:14px;font-weight:800;border-bottom:1px solid var(--border)}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);direction:rtl;padding:20px;min-height:100vh}
+.card{background:var(--surface);border-radius:12px;padding:25px;max-width:550px;margin:0 auto;box-shadow:0 4px 12px rgba(0,0,0,0.05);border:1px solid var(--border)}
+h2{color:var(--accent);margin-bottom:20px;text-align:center}
+.legend{display:flex;gap:10px;margin-bottom:20px;font-size:13px;background:#f8fafc;padding:12px;border-radius:10px;justify-content:center}
+.dot{width:12px;height:12px;border-radius:50%}
+label{display:block;margin:15px 0 5px;font-weight:700;font-size:14px}
+input,textarea{width:100%;padding:14px;border:1px solid var(--border);border-radius:10px;margin-bottom:10px;font-family:inherit;font-size:16px}
+.day-block{border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;background:#fff}
+.day-lbl{background:#f1f5f9;padding:10px;font-weight:800;font-size:14px;border-bottom:1px solid var(--border)}
 .srow{display:flex}
-.sc{flex:1;padding:16px;text-align:center;cursor:pointer;border-left:1px solid var(--border);font-weight:700;color:var(--muted);transition:0.2s}
+.sc{flex:1;padding:18px;text-align:center;cursor:pointer;border-left:1px solid var(--border);font-weight:700;color:#64748B;transition:0.2s}
 .sc:last-child{border-left:none}
-
-/* צבעי משמרות */
-.sc.yes{background:var(--accent-light);color:var(--accent);border-bottom:4px solid var(--accent)}
+.sc.yes{background:var(--accent-light);color:#1B4332;border-bottom:4px solid var(--accent)}
 .sc.maybe{background:#FEF3C7;color:#92400E;border-bottom:4px solid #F59E0B}
 .sc.no{background:#FEE2E2;color:#991B1B;border-bottom:4px solid #EF4444}
-
-.btn{padding:15px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;width:100%;border:none;margin-top:20px;transition:0.2s;font-family:inherit}
-.btn-green{background:var(--accent);color:white}
+.btn{width:100%;padding:18px;background:var(--accent);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:18px;margin-top:15px}
 .btn:disabled{background:#ccc;cursor:not-allowed}
-
-/* עיצוב רשימת הגשות וסידור סופי */
-.sub-card, .pub-row, .sched-row{background:white;border:1px solid var(--border);border-radius:10px;padding:15px;margin-bottom:10px}
-.sched-row{display:flex;justify-content:space-between;align-items:center;background:#f8fafc}
-.sched-select{padding:8px;border-radius:8px;border:1px solid var(--border);font-family:inherit}
-
-[hidden]{display:none!important}
 </style>
 </head>
 <body>
-
-<header>
-  <div class="logo">סידור משמרות</div>
-  <div class="tabs" id="tab-bar">
-    <button class="tab active" id="btn-team" onclick="showTab('team')">טופס</button>
-    <button class="tab" id="btn-subs" onclick="showTab('subs')">הגשות</button>
-    <button class="tab" id="btn-build" onclick="showTab('build')">בנייה</button>
+<div class="card">
+  <h2>סידור משמרות</h2>
+  <div class="legend">
+    <div style="display:flex;align-items:center;gap:5px"><div class="dot" style="background:#2D6A4F"></div>יכול/ה</div>
+    <div style="display:flex;align-items:center;gap:5px"><div class="dot" style="background:#F59E0B"></div>אפשרי</div>
+    <div style="display:flex;align-items:center;gap:5px"><div class="dot" style="background:#EF4444"></div>לא יכול/ה</div>
   </div>
-</header>
-
-<main>
-  <!-- טאב טופס (לכולם) -->
-  <div id="tab-team">
-    <div class="card">
-      <div class="card-title">הגשת זמינות לשבוע הבא</div>
-      <div class="legend">
-        <div class="legend-item"><div class="dot" style="background:#2D6A4F"></div>יכול/ה</div>
-        <div class="legend-item"><div class="dot" style="background:#F59E0B"></div>אפשרי (עדיפות שלא)</div>
-        <div class="legend-item"><div class="dot" style="background:#EF4444"></div>לא יכול/ה</div>
-      </div>
-      
-      <label>שם מלא *</label>
-      <input type="text" id="emp-name" placeholder="הכנס/י שם...">
-      
-      <label>זמינות (לחצו לשינוי סטטוס):</label>
-      <div id="grid"></div>
-
-      <label>הערות</label>
-      <textarea id="emp-notes" rows="2" placeholder="בקשות מיוחדות..."></textarea>
-      
-      <button class="btn btn-green" id="submit-btn" onclick="submitForm()">שליחת זמינות</button>
-    </div>
-
-    <!-- הצגת סידור שפורסם כבר (יופיע רק אם יש כזה) -->
-    <div id="published-section" hidden style="margin-top:25px">
-      <div class="card">
-        <div class="card-title">📋 הסידור הסופי שפורסם</div>
-        <div id="team-pub-grid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- טאב הגשות (למנהלת) -->
-  <div id="tab-subs" hidden>
-    <div class="card-title">רשימת הגשות שהתקבלו</div>
-    <div id="subs-list"></div>
-  </div>
-
-  <!-- טאב בנייה (למנהלת) -->
-  <div id="tab-build" hidden>
-    <div class="card-title">בניית סידור שבועי</div>
-    <div id="build-area"></div>
-  </div>
-</main>
+  <label>שם מלא *</label>
+  <input type="text" id="emp-name" placeholder="איך קוראים לך?">
+  <div id="grid"></div>
+  <label>הערות</label>
+  <textarea id="emp-notes" rows="2" placeholder="משהו נוסף שצריך לדעת?"></textarea>
+  <button class="btn" id="submit-btn">שליחת זמינות</button>
+</div>
 
 <script>
 const SUPABASE_URL = 'https://bkqggppgusfvufyfmndv.supabase.co';
@@ -124,100 +50,66 @@ const DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שי
 const SHIFTS = ['בוקר','ערב'];
 let avail = {};
 
-window.addEventListener('DOMContentLoaded', () => {
-  buildGrid();
-  // אם יש #manager בלינק - מראים את הטאבים של המנהלת
-  if (window.location.hash === '#manager') {
-    document.getElementById('tab-bar').style.display = 'flex';
-    showTab('subs');
-  }
-  loadPublished();
-});
-
-function buildGrid() {
-  let h = '';
+function init() {
+  let html = '';
   DAYS.forEach(d => {
-    h += `<div class="day-block"><div class="day-lbl">${d}</div><div class="srow">`;
+    html += `<div class="day-block"><div class="day-lbl">${d}</div><div class="srow">`;
     SHIFTS.forEach(s => {
       const k = `${d}_${s}`; avail[k] = 'none';
-      h += `<div class="sc" id="${k}" onclick="toggle('${k}')">${s}</div>`;
+      html += `<div class="sc" id="${k}" onclick="toggle('${k}')">${s}</div>`;
     });
-    h += `</div></div>`;
+    html += `</div></div>`;
   });
-  document.getElementById('grid').innerHTML = h;
+  document.getElementById('grid').innerHTML = html;
 }
 
 function toggle(k) {
-  const s = ['none','yes','maybe','no'];
-  avail[k] = s[(s.indexOf(avail[k]) + 1) % s.length];
+  const states = ['none','yes','maybe','no'];
+  avail[k] = states[(states.indexOf(avail[k]) + 1) % states.length];
   document.getElementById(k).className = 'sc ' + avail[k];
 }
 
-function showTab(t) {
-  ['team','subs','build'].forEach(id => document.getElementById('tab-'+id).hidden = (id!==t));
-  ['team','subs','build'].forEach(id => document.getElementById('btn-'+id).classList.toggle('active', id===t));
-  if(t==='subs') loadSubs();
-  if(t==='build') loadBuild();
-}
-
-async function submitForm() {
+document.getElementById('submit-btn').addEventListener('click', async () => {
   const name = document.getElementById('emp-name').value.trim();
-  if(!name) return alert('נא להזין שם!');
+  if(!name) return alert('נא להזין שם מלא');
+
   const btn = document.getElementById('submit-btn');
-  btn.disabled = true; btn.innerText = 'שולח...';
+  btn.disabled = true;
+  btn.innerText = 'שולח נתונים...';
+
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/shifts`, {
       method: 'POST',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ name, availability: avail, notes: document.getElementById('emp-notes').value, submitted_at: new Date().toISOString() })
+      headers: { 
+        'apikey': SUPABASE_KEY, 
+        'Authorization': `Bearer ${SUPABASE_KEY}`, 
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ 
+        name: name, 
+        availability: avail, 
+        notes: document.getElementById('emp-notes').value, 
+        submitted_at: new Date().toISOString() 
+      })
     });
-    if(res.ok){ alert('נשלח בהצלחה לעדן!'); location.reload(); }
-    else alert('שגיאה בשליחה');
-  } catch(e){ alert('שגיאת חיבור'); }
-  finally { btn.disabled = false; btn.innerText = 'שליחת זמינות'; }
-}
 
-async function loadPublished() {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/schedule?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-  const data = await r.json();
-  if(data && data.length > 0) {
-    document.getElementById('published-section').hidden = false;
-    document.getElementById('team-pub-grid').innerHTML = data.map(s => `<div class="pub-row"><b>${s.day_id} ${s.shift_id}:</b> ${s.person_name}</div>`).join('');
+    if(res.ok) {
+      alert('הזמינות נשלחה בהצלחה!');
+      location.reload();
+    } else {
+      const errorData = await res.json();
+      alert('שגיאת שרת: ' + (errorData.message || 'לא ידועה'));
+    }
+  } catch (e) {
+    alert('שגיאת חיבור: וודא שיש אינטרנט ונסה שוב');
+  } finally {
+    btn.disabled = false;
+    btn.innerText = 'שליחת זמינות';
   }
-}
+});
 
-async function loadSubs() {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/shifts?select=*&order=submitted_at.desc`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-  const data = await r.json();
-  document.getElementById('subs-list').innerHTML = data.map(sub => `<div class="sub-card"><b>${sub.name}</b><br><small>${sub.notes || ''}</small></div>`).join('') || 'אין הגשות עדיין';
-}
-
-async function loadBuild() {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/shifts?select=*`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-  const subs = await r.json();
-  const names = [...new Set(subs.map(s => s.name))];
-  let h = '';
-  DAYS.forEach(d => SHIFTS.forEach(s => {
-    h += `<div class="sched-row"><span>${d} ${s}</span><select class="sched-select" id="sel-${d}_${s}"><option value="">-- בחר --</option>${names.map(n => `<option value="${n}">${n}</option>`).join('')}</select></div>`;
-  }));
-  h += `<button class="btn btn-green" onclick="publish()">פרסום סידור סופי</button>`;
-  document.getElementById('build-area').innerHTML = h;
-}
-
-async function publish() {
-  const rows = [];
-  DAYS.forEach(d => SHIFTS.forEach(s => {
-    const val = document.getElementById(`sel-${d}_${s}`).value;
-    if(val) rows.push({ day_id: d, shift_id: s, person_name: val, published_at: new Date().toISOString() });
-  }));
-  await fetch(`${SUPABASE_URL}/rest/v1/schedule?day_id=not.is.null`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(rows)
-  });
-  if(res.ok) alert('הסידור פורסם בהצלחה!');
-}
+init();
 </script>
 </body>
 </html>
