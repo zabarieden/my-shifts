@@ -15,7 +15,7 @@
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
         h2 { color: var(--accent); margin-bottom: 20px; text-align: center; }
         
-        /* מקרא צבעים חדש */
+        /* מקרא צבעים */
         .legend { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 13px; font-weight: 700; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
         .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); }
@@ -51,7 +51,6 @@
     <div id="submit-section">
         <h2 id="form-title">סידור משמרות</h2>
         
-        <!-- מקרא צבעים שמופיע לעובדים -->
         <div class="legend">
             <div class="legend-item"><span class="dot yes"></span> יכול</div>
             <div class="legend-item"><span class="dot maybe"></span> אפשרי</div>
@@ -156,7 +155,14 @@
 
     async function publishSchedule() {
         if(!confirm('פרסום ינקה את כל הגשות הזמינות של העובדים מהטבלה. להמשיך?')) return;
-        await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+
+        // 1. מחיקת סידור קודם
+        await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=neq.-1`, { 
+            method: 'DELETE', 
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } 
+        });
+
+        // 2. שמירת סידור חדש
         const rows = [];
         DAYS.forEach(d => SHIFTS.forEach(s => {
             let names = [];
@@ -166,13 +172,19 @@
             }
             if(names.length) rows.push({ day_id: d, shift_id: s, person_name: names.join(', '), published_at: new Date().toISOString() });
         }));
+
         const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, {
             method: 'POST',
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(rows)
         });
+
         if(res.ok) {
-            await fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+            // 3. ניקוי גורף של טבלת ההגשות (Shifts)
+            await fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { 
+                method: 'DELETE', 
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } 
+            });
             alert('הסידור פורסם והגשות העובדים נוקו!');
             location.reload();
         }
@@ -189,7 +201,7 @@
         const data = await res.json();
         if(data.length) {
             document.getElementById('published-box').style.display = 'block';
-            document.getElementById('schedule-list').innerHTML = data.map(i => `<div><strong>${i.day_id} ${i.shift_id}:</strong> ${i.person_name}</div>`).join('');
+            document.getElementById('schedule-list').innerHTML = data.map(i => `<div><strong>יום ${i.day_id} ${i.shift_id}:</strong> ${i.person_name}</div>`).join('');
         }
     }
     init();
