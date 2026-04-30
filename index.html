@@ -15,7 +15,6 @@
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
         h2 { color: var(--accent); margin-bottom: 20px; text-align: center; }
         
-        /* מקרא צבעים */
         .legend { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 13px; font-weight: 700; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
         .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); }
@@ -50,13 +49,11 @@
 
     <div id="submit-section">
         <h2 id="form-title">סידור משמרות</h2>
-        
         <div class="legend">
             <div class="legend-item"><span class="dot yes"></span> יכול</div>
             <div class="legend-item"><span class="dot maybe"></span> אפשרי</div>
             <div class="legend-item"><span class="dot no"></span> לא יכול</div>
         </div>
-
         <div id="published-box">
             <strong>📋 הסידור הסופי שפורסם:</strong>
             <div id="schedule-list" style="margin-top:10px; font-size:14px; line-height:1.6;"></div>
@@ -71,9 +68,10 @@
 
     <div id="manage-section" style="display:none;">
         <h2>ניהול ושיבוץ</h2>
+        <p style="text-align:center; font-size:12px; margin-bottom:10px;">הערה: הסידור הקיים נטען אוטומטית לעריכה</p>
         <div id="admin-grid"></div>
-        <button class="btn" onclick="publishSchedule()" style="background:#1E293B">פרסום סידור וניקוי הגשות</button>
-        <button class="btn btn-danger" onclick="deletePublishedOnly()">מחיקת פרסום קיים בלבד</button>
+        <button class="btn" onclick="publishSchedule()" style="background:#1E293B">פרסום סידור מעודכן</button>
+        <button class="btn btn-danger" onclick="deletePublishedOnly()">מחיקת פרסום קיים</button>
     </div>
 </div>
 
@@ -84,13 +82,19 @@
     const SHIFTS = ['בוקר','ערב'];
     let avail = {};
     let allSubmissions = [];
+    let currentSchedule = [];
 
-    function init() {
+    async function init() {
         if(window.location.hash === '#manager') {
             document.getElementById('manager-tabs').style.display = 'flex';
-            loadSubmissions();
+            await loadDataForManager();
             switchTab('manage');
         }
+        renderSubmitGrid();
+        loadPublishedSchedule();
+    }
+
+    function renderSubmitGrid() {
         let html = '';
         DAYS.forEach(d => {
             html += `<div class="day-block"><div class="day-lbl">${d}</div><div class="srow">`;
@@ -101,7 +105,6 @@
             html += `</div></div>`;
         });
         document.getElementById('grid').innerHTML = html;
-        loadPublishedSchedule();
     }
 
     function toggle(k) {
@@ -117,6 +120,77 @@
         document.getElementById('btn-manage').classList.toggle('active', t === 'manage');
     }
 
+    async function loadDataForManager() {
+        const [subRes, schedRes] = await Promise.all([
+            fetch(`${SUPABASE_URL}/rest/v1/shifts`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
+            fetch(`${SUPABASE_URL}/rest/v1/schedule`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } })
+        ]);
+        allSubmissions = await subRes.json();
+        currentSchedule = await schedRes.json();
+        renderAdminGrid();
+    }
+
+    function renderAdminGrid() {
+        let html = '';
+        DAYS.forEach(d => {
+            html += `<div class="day-block"><div class="day-lbl">${d}</div>`;
+            SHIFTS.forEach(s => {
+                const key = `${d}_${s}`;
+                const savedData = currentSchedule.find(i => i.day_id === d && i.shift_id === s);
+                const savedNames = savedData ? savedData.person_name.split(', ') : [];
+
+                html += `<div class="manager-row"><div style="font-weight:bold; color:var(--accent)">${s}</div>`;
+                for(let i=1; i<=3; i++) {
+                    const currentVal = savedNames[i-1] || "";
+                    html += `<div class="slot">
+                        <select id="sel-${key}-${i}">
+                            <option value="">בחר עובד ${i}...</option>`;
+                    allSubmissions.forEach(e => {
+                        const status = e.availability[key];
+                        let icon = "";
+                        if(status === 'yes') icon = "🟢 ";
+                        if(status === 'maybe') icon = "🟡 ";
+                        if(status === 'no') icon = "🔴 "; // סימון "לא יכול" נוסף כאן
+                        
+                        // כאן המנהלת תראה את כולם, כולל את מי שסימן "לא יכול"
+                        const isSelected = e.name === currentVal ? 'selected' : '';
+                        html += `<option value="${e.name}" ${isSelected}>${icon}${e.name}</option>`;
+                    });
+                    html += `</select>
+                        <input type="text" id="manual-${key}-${i}" value="${currentVal && !allSubmissions.some(e=>e.name===currentVal) ? currentVal : ''}" placeholder="שם ידני" style="width:100px;">
+                    </div>`;
+                }
+                html += `</div>`;
+            });
+            html += `</div>`;
+        });
+        document.getElementById('admin-grid').innerHTML = html;
+    }
+
+    async function publishSchedule() {
+        if(!confirm('לעדכן את הפרסום ולנקות הגשות חדשות?')) return;
+        await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=neq.-1`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+        const rows = [];
+        DAYS.forEach(d => SHIFTS.forEach(s => {
+            let names = [];
+            for(let i=1; i<=3; i++) {
+                const n = document.getElementById(`manual-${d}_${s}-${i}`).value.trim() || document.getElementById(`sel-${d}_${s}-${i}`).value;
+                if(n) names.push(n);
+            }
+            if(names.length) rows.push({ day_id: d, shift_id: s, person_name: names.join(', '), published_at: new Date().toISOString() });
+        }));
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(rows)
+        });
+        if(res.ok) {
+            await fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+            alert('הסידור עודכן בהצלחה!');
+            location.reload();
+        }
+    }
+
     async function sendAvailability() {
         const name = document.getElementById('emp-name').value.trim();
         if(!name) return alert('נא להזין שם');
@@ -128,70 +202,8 @@
         if(res.ok) { alert('נשלח בהצלחה!'); location.reload(); }
     }
 
-    async function loadSubmissions() {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/shifts`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-        allSubmissions = await res.json();
-        renderAdminGrid();
-    }
-
-    function renderAdminGrid() {
-        let html = '';
-        DAYS.forEach(d => {
-            html += `<div class="day-block"><div class="day-lbl">${d}</div>`;
-            SHIFTS.forEach(s => {
-                const key = `${d}_${s}`;
-                html += `<div class="manager-row"><div style="font-weight:bold; color:var(--accent)">${s}</div>`;
-                for(let i=1; i<=3; i++) {
-                    html += `<div class="slot"><select id="sel-${key}-${i}"><option value="">בחר עובד ${i}...</option>`;
-                    allSubmissions.forEach(e => { if(e.availability[key] !== 'no' && e.availability[key] !== 'none') html += `<option value="${e.name}">${e.name}</option>`; });
-                    html += `</select><input type="text" id="manual-${key}-${i}" placeholder="שם ידני" style="width:100px;"></div>`;
-                }
-                html += `</div>`;
-            });
-            html += `</div>`;
-        });
-        document.getElementById('admin-grid').innerHTML = html;
-    }
-
-    async function publishSchedule() {
-        if(!confirm('פרסום ינקה את כל הגשות הזמינות של העובדים מהטבלה. להמשיך?')) return;
-
-        // 1. מחיקת סידור קודם
-        await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=neq.-1`, { 
-            method: 'DELETE', 
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } 
-        });
-
-        // 2. שמירת סידור חדש
-        const rows = [];
-        DAYS.forEach(d => SHIFTS.forEach(s => {
-            let names = [];
-            for(let i=1; i<=3; i++) {
-                const n = document.getElementById(`manual-${d}_${s}-${i}`).value.trim() || document.getElementById(`sel-${d}_${s}-${i}`).value;
-                if(n) names.push(n);
-            }
-            if(names.length) rows.push({ day_id: d, shift_id: s, person_name: names.join(', '), published_at: new Date().toISOString() });
-        }));
-
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify(rows)
-        });
-
-        if(res.ok) {
-            // 3. ניקוי גורף של טבלת ההגשות (Shifts)
-            await fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { 
-                method: 'DELETE', 
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } 
-            });
-            alert('הסידור פורסם והגשות העובדים נוקו!');
-            location.reload();
-        }
-    }
-
     async function deletePublishedOnly() {
-        if(!confirm('למחוק את הפרסום שמופיע לעובדים?')) return;
+        if(!confirm('למחוק את הפרסום הקיים?')) return;
         const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
         if(res.ok) { alert('הפרסום נמחק'); location.reload(); }
     }
