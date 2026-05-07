@@ -165,30 +165,23 @@
             SHIFTS.forEach(s => {
                 if (d === 'שישי' && s === 'ערב') return;
                 const key = `${d}_${s}`;
-                const savedData = currentSchedule.find(i => i.day_id === d && i.shift_id === s);
-                const savedNames = savedData ? savedData.person_name.split(', ') : [];
                 
                 html += `<div class="manager-row"><div style="font-weight:bold; color:var(--accent)">${s}</div>`;
                 for(let i=1; i<=3; i++) {
-                    const currentVal = savedNames[i-1] || "";
-                    // בודקים אם הערך השמור הוא "ידני" (לא נמצא ברשימת המגישים)
-                    const isManual = currentVal && !allSubmissions.some(e => e.name === currentVal);
-                    
                     html += `<div class="slot">`;
                     html += `<select id="sel-${key}-${i}"><option value="">בחר עובד ${i}...</option>`;
                     
                     allSubmissions.forEach(e => {
                         const status = e.availability[key];
-                        // מציג רק אם העובד הגיש זמינות למשמרת הזו
                         if (status && status !== 'none') {
                             let icon = status === 'yes' ? '🟢 ' : status === 'maybe' ? '🟡 ' : status === 'no' ? '🔴 ' : '';
-                            html += `<option value="${e.name}" ${e.name === currentVal ? 'selected' : ''}>${icon}${e.name}</option>`;
+                            html += `<option value="${e.name}">${icon}${e.name}</option>`;
                         }
                     });
                     
                     html += `</select>`;
-                    // כאן השדה הידני - הוא יתנקה בפרסום חדש
-                    html += `<input type="text" id="manual-${key}-${i}" value="${isManual ? currentVal : ''}" placeholder="שם ידני" style="width:100px;"></div>`;
+                    // שינוי כאן: ה-value תמיד ריק בטעינה כדי שהמנהלת תתחיל מדף נקי
+                    html += `<input type="text" id="manual-${key}-${i}" value="" placeholder="שם ידני" style="width:100px;"></div>`;
                 }
                 html += `</div>`;
             });
@@ -231,7 +224,6 @@
     async function publishSchedule() {
         if(!confirm('לפרסם ולנקות הכל לשבוע הבא?')) return;
         
-        // מחיקת נתונים ישנים
         await Promise.all([
             fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
             fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } })
@@ -242,14 +234,10 @@
             if (d === 'שישי' && s === 'ערב') return;
             let names = [];
             for(let i=1; i<=3; i++) {
-                const manualInput = document.getElementById(`manual-${d}_${s}-${i}`);
-                const selectBox = document.getElementById(`sel-${d}_${s}-${i}`);
-                
-                const n = manualInput.value.trim() || selectBox.value;
+                const manualVal = document.getElementById(`manual-${d}_${s}-${i}`).value.trim();
+                const selectVal = document.getElementById(`sel-${d}_${s}-${i}`).value;
+                const n = manualVal || selectVal;
                 if(n) names.push(n);
-                
-                // ניקוי השדה הידני למניעת שאריות
-                manualInput.value = "";
             }
             if(names.length) rows.push({ day_id: d, shift_id: s, person_name: names.join(', '), published_at: new Date().toISOString() });
         }));
@@ -261,11 +249,10 @@
                 body: JSON.stringify(rows) 
             }); 
         }
-        alert('פורסם! המערכת נוקתה לשבוע חדש.'); 
+        alert('פורסם בהצלחה!'); 
         location.reload();
     }
 
-    // שאר הפונקציות ללא שינוי
     async function sendAvailability() {
         const name = document.getElementById('emp-name').value.trim();
         if(!name) return alert('שם חובה');
@@ -276,10 +263,10 @@
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, 
             body: JSON.stringify({ name, availability: filteredAvail, notes: document.getElementById('emp-notes').value, submitted_at: new Date().toISOString() }) 
         });
-        alert('נשלח!'); location.reload();
+        alert('זמינותך נשלחה בהצלחה!'); location.reload();
     }
 
-    function toggleQuickEdit() { isEditing = !isEditing; document.getElementById('quick-save-area').style.display = isEditing ? 'flex' : 'none'; document.getElementById('quick-edit-btn').innerText = isEditing ? 'בטל' : 'עריכה'; renderPublishedList(); }
+    function toggleQuickEdit() { isEditing = !isEditing; document.getElementById('quick-save-area').style.display = isEditing ? 'flex' : 'none'; document.getElementById('quick-edit-btn').innerText = isEditing ? 'בטל' : 'עריכה מהירה'; renderPublishedList(); }
     async function deletePublishedOnly() { if(confirm('למחוק פרסום?')) { await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); location.reload(); } }
     init();
 </script>
