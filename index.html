@@ -38,7 +38,8 @@
         .btn-small { width: auto; padding: 5px 10px; font-size: 12px; margin: 0; display: inline-block; background: var(--info); }
         
         .manager-row { padding: 12px; border-bottom: 1px solid #eee; background: #fafafa; }
-        .slot { display: flex; gap: 5px; margin-bottom: 8px; }
+        .slot { display: flex; gap: 5px; margin-bottom: 8px; align-items: center; }
+        .slot-time { font-size: 12px; font-weight: 800; color: #64748B; min-width: 45px; text-align: left; }
         
         #published-box { margin-top: 20px; padding: 15px; background: #E0F2FE; border-radius: 10px; border: 1px solid #7DD3FC; display: none; position: relative; }
         .edit-controls { margin-top: 10px; display: flex; gap: 5px; }
@@ -165,12 +166,23 @@
             SHIFTS.forEach(s => {
                 if (d === 'שישי' && s === 'ערב') return;
                 const key = `${d}_${s}`;
+                html += `<div class="manager-row"><div style="font-weight:bold; color:var(--accent); margin-bottom:8px;">${s}</div>`;
                 
-                html += `<div class="manager-row"><div style="font-weight:bold; color:var(--accent)">${s}</div>`;
-                for(let i=1; i<=3; i++) {
+                for(let i=0; i<3; i++) {
+                    let hourLabel = "";
+                    if (d === 'שישי') {
+                        if (i === 0 || i === 1) hourLabel = "07:00";
+                        else if (i === 2) hourLabel = "08:00";
+                    } else {
+                        // ימי א-ה
+                        if (i === 0) hourLabel = (s === 'בוקר' ? "07:00" : "14:00");
+                        else if (i === 1) hourLabel = (s === 'בוקר' ? "09:00" : "16:00");
+                        else hourLabel = "--:--"; // משבצת שלישית
+                    }
+
                     html += `<div class="slot">`;
-                    html += `<select id="sel-${key}-${i}"><option value="">בחר עובד ${i}...</option>`;
-                    
+                    html += `<span class="slot-time">${hourLabel}</span>`;
+                    html += `<select id="sel-${key}-${i+1}"><option value="">בחר עובד...</option>`;
                     allSubmissions.forEach(e => {
                         const status = e.availability[key];
                         if (status && status !== 'none') {
@@ -178,10 +190,8 @@
                             html += `<option value="${e.name}">${icon}${e.name}</option>`;
                         }
                     });
-                    
                     html += `</select>`;
-                    // שינוי כאן: ה-value תמיד ריק בטעינה כדי שהמנהלת תתחיל מדף נקי
-                    html += `<input type="text" id="manual-${key}-${i}" value="" placeholder="שם ידני" style="width:100px;"></div>`;
+                    html += `<input type="text" id="manual-${key}-${i+1}" placeholder="ידני" style="width:80px;"></div>`;
                 }
                 html += `</div>`;
             });
@@ -201,8 +211,7 @@
                     if (!name.trim()) return "";
                     let hour = "";
                     if (i.day_id === 'שישי') {
-                        if (index === 0) hour = "07:00";
-                        else if (index === 1) hour = "07:00";
+                        if (index === 0 || index === 1) hour = "07:00";
                         else if (index === 2) hour = "08:00";
                     } else {
                         if (index === 0) hour = (i.shift_id === 'בוקר' ? "07:00" : "14:00");
@@ -223,34 +232,24 @@
 
     async function publishSchedule() {
         if(!confirm('לפרסם ולנקות הכל לשבוע הבא?')) return;
-        
         await Promise.all([
             fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
             fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } })
         ]);
-
         const rows = [];
         DAYS.forEach(d => SHIFTS.forEach(s => {
             if (d === 'שישי' && s === 'ערב') return;
             let names = [];
             for(let i=1; i<=3; i++) {
-                const manualVal = document.getElementById(`manual-${d}_${s}-${i}`).value.trim();
-                const selectVal = document.getElementById(`sel-${d}_${s}-${i}`).value;
-                const n = manualVal || selectVal;
+                const manual = document.getElementById(`manual-${d}_${s}-${i}`).value.trim();
+                const sel = document.getElementById(`sel-${d}_${s}-${i}`).value;
+                const n = manual || sel;
                 if(n) names.push(n);
             }
             if(names.length) rows.push({ day_id: d, shift_id: s, person_name: names.join(', '), published_at: new Date().toISOString() });
         }));
-
-        if(rows.length) { 
-            await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { 
-                method: 'POST', 
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(rows) 
-            }); 
-        }
-        alert('פורסם בהצלחה!'); 
-        location.reload();
+        if(rows.length) { await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify(rows) }); }
+        alert('פורסם בהצלחה!'); location.reload();
     }
 
     async function sendAvailability() {
@@ -258,12 +257,8 @@
         if(!name) return alert('שם חובה');
         const filteredAvail = {};
         for (let key in avail) { if (avail[key] !== 'none') filteredAvail[key] = avail[key]; }
-        await fetch(`${SUPABASE_URL}/rest/v1/shifts`, { 
-            method: 'POST', 
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ name, availability: filteredAvail, notes: document.getElementById('emp-notes').value, submitted_at: new Date().toISOString() }) 
-        });
-        alert('זמינותך נשלחה בהצלחה!'); location.reload();
+        await fetch(`${SUPABASE_URL}/rest/v1/shifts`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name, availability: filteredAvail, notes: document.getElementById('emp-notes').value, submitted_at: new Date().toISOString() }) });
+        alert('זמינותך נשלחה!'); location.reload();
     }
 
     function toggleQuickEdit() { isEditing = !isEditing; document.getElementById('quick-save-area').style.display = isEditing ? 'flex' : 'none'; document.getElementById('quick-edit-btn').innerText = isEditing ? 'בטל' : 'עריכה מהירה'; renderPublishedList(); }
