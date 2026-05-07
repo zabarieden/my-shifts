@@ -174,7 +174,6 @@
                     html += `<div class="slot"><select id="sel-${key}-${i}"><option value="">בחר עובד ${i}...</option>`;
                     allSubmissions.forEach(e => {
                         const status = e.availability[key];
-                        // שינוי קריטי: מציג את העובד רק אם הוא סימן סטטוס כלשהו (לא none)
                         if (status && status !== 'none') {
                             let icon = status === 'yes' ? '🟢 ' : status === 'maybe' ? '🟡 ' : status === 'no' ? '🔴 ' : '';
                             html += `<option value="${e.name}" ${e.name === currentVal ? 'selected' : ''}>${icon}${e.name}</option>`;
@@ -195,10 +194,33 @@
         if(currentSchedule.length) { document.getElementById('published-box').style.display = 'block'; renderPublishedList(); }
     }
 
+    // הפונקציה המעודכנת עם לוגיקת השעות שלך
     function renderPublishedList() {
         const list = document.getElementById('schedule-list');
-        if (isEditing) { list.innerHTML = currentSchedule.map(i => `<div style="margin-bottom:8px;"><strong>יום ${i.day_id} ${i.shift_id}:</strong> <input type="text" class="quick-edit-input" data-day="${i.day_id}" data-shift="${i.shift_id}" value="${i.person_name}"></div>`).join(''); }
-        else { list.innerHTML = currentSchedule.map(i => `<div><strong>יום ${i.day_id} ${i.shift_id}:</strong> ${i.person_name}</div>`).join(''); }
+        if (isEditing) { 
+            list.innerHTML = currentSchedule.map(i => `<div style="margin-bottom:8px;"><strong>יום ${i.day_id} ${i.shift_id}:</strong> <input type="text" class="quick-edit-input" data-day="${i.day_id}" data-shift="${i.shift_id}" value="${i.person_name}"></div>`).join(''); 
+        } else { 
+            list.innerHTML = currentSchedule.map(i => {
+                const names = i.person_name.split(', ');
+                const formattedNames = names.map((name, index) => {
+                    if (!name.trim()) return "";
+                    let hour = "";
+                    if (i.day_id === 'שישי') {
+                        if (index === 0) hour = "07:00";
+                        else if (index === 1) hour = "07:00";
+                        else if (index === 2) hour = "08:00";
+                    } else {
+                        // ימים א-ה
+                        if (index === 0) hour = (i.shift_id === 'בוקר' ? "07:00" : "14:00");
+                        else if (index === 1) hour = (i.shift_id === 'בוקר' ? "09:00" : "16:00");
+                        // משבצת שלישית (index 2) נשארת ריקה
+                    }
+                    return hour ? `${hour} ${name}` : name;
+                }).filter(n => n !== "").join(', ');
+
+                return `<div><strong>יום ${i.day_id} ${i.shift_id}:</strong> ${formattedNames}</div>`;
+            }).join(''); 
+        }
     }
 
     function toggleQuickEdit() {
@@ -238,19 +260,16 @@
     async function sendAvailability() {
         const name = document.getElementById('emp-name').value.trim();
         if(!name) return alert('שם חובה');
-        
-        // סינון: שולח רק משמרות שאינן none
         const filteredAvail = {};
         for (let key in avail) {
             if (avail[key] !== 'none') filteredAvail[key] = avail[key];
         }
-
         await fetch(`${SUPABASE_URL}/rest/v1/shifts`, { 
             method: 'POST', 
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, 
             body: JSON.stringify({ 
                 name, 
-                availability: filteredAvail, // שולח רק מה שסומן
+                availability: filteredAvail, 
                 notes: document.getElementById('emp-notes').value, 
                 submitted_at: new Date().toISOString() 
             }) 
