@@ -167,19 +167,28 @@
                 const key = `${d}_${s}`;
                 const savedData = currentSchedule.find(i => i.day_id === d && i.shift_id === s);
                 const savedNames = savedData ? savedData.person_name.split(', ') : [];
+                
                 html += `<div class="manager-row"><div style="font-weight:bold; color:var(--accent)">${s}</div>`;
                 for(let i=1; i<=3; i++) {
                     const currentVal = savedNames[i-1] || "";
+                    // בודקים אם הערך השמור הוא "ידני" (לא נמצא ברשימת המגישים)
                     const isManual = currentVal && !allSubmissions.some(e => e.name === currentVal);
-                    html += `<div class="slot"><select id="sel-${key}-${i}"><option value="">בחר עובד ${i}...</option>`;
+                    
+                    html += `<div class="slot">`;
+                    html += `<select id="sel-${key}-${i}"><option value="">בחר עובד ${i}...</option>`;
+                    
                     allSubmissions.forEach(e => {
                         const status = e.availability[key];
+                        // מציג רק אם העובד הגיש זמינות למשמרת הזו
                         if (status && status !== 'none') {
                             let icon = status === 'yes' ? '🟢 ' : status === 'maybe' ? '🟡 ' : status === 'no' ? '🔴 ' : '';
                             html += `<option value="${e.name}" ${e.name === currentVal ? 'selected' : ''}>${icon}${e.name}</option>`;
                         }
                     });
-                    html += `</select><input type="text" id="manual-${key}-${i}" value="${isManual ? currentVal : ''}" placeholder="שם ידני" style="width:100px;"></div>`;
+                    
+                    html += `</select>`;
+                    // כאן השדה הידני - הוא יתנקה בפרסום חדש
+                    html += `<input type="text" id="manual-${key}-${i}" value="${isManual ? currentVal : ''}" placeholder="שם ידני" style="width:100px;"></div>`;
                 }
                 html += `</div>`;
             });
@@ -188,13 +197,6 @@
         document.getElementById('admin-grid').innerHTML = html;
     }
 
-    async function loadPublishedSchedule() {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-        currentSchedule = await res.json();
-        if(currentSchedule.length) { document.getElementById('published-box').style.display = 'block'; renderPublishedList(); }
-    }
-
-    // הפונקציה המעודכנת עם לוגיקת השעות שלך
     function renderPublishedList() {
         const list = document.getElementById('schedule-list');
         if (isEditing) { 
@@ -210,73 +212,74 @@
                         else if (index === 1) hour = "07:00";
                         else if (index === 2) hour = "08:00";
                     } else {
-                        // ימים א-ה
                         if (index === 0) hour = (i.shift_id === 'בוקר' ? "07:00" : "14:00");
                         else if (index === 1) hour = (i.shift_id === 'בוקר' ? "09:00" : "16:00");
-                        // משבצת שלישית (index 2) נשארת ריקה
                     }
                     return hour ? `${hour} ${name}` : name;
                 }).filter(n => n !== "").join(', ');
-
                 return `<div><strong>יום ${i.day_id} ${i.shift_id}:</strong> ${formattedNames}</div>`;
             }).join(''); 
         }
     }
 
-    function toggleQuickEdit() {
-        isEditing = !isEditing;
-        document.getElementById('quick-save-area').style.display = isEditing ? 'flex' : 'none';
-        document.getElementById('quick-edit-btn').innerText = isEditing ? 'בטל עריכה' : 'עריכה מהירה';
-        renderPublishedList();
-    }
-
-    async function saveQuickEdit() {
-        const updates = Array.from(document.querySelectorAll('.quick-edit-input')).map(input => ({ day_id: input.dataset.day, shift_id: input.dataset.shift, person_name: input.value, published_at: new Date().toISOString() }));
-        await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=neq.-1`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-        await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify(updates) });
-        alert('עודכן!'); location.reload();
+    async function loadPublishedSchedule() {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+        currentSchedule = await res.json();
+        if(currentSchedule.length) { document.getElementById('published-box').style.display = 'block'; renderPublishedList(); }
     }
 
     async function publishSchedule() {
         if(!confirm('לפרסם ולנקות הכל לשבוע הבא?')) return;
+        
+        // מחיקת נתונים ישנים
         await Promise.all([
             fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }),
             fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } })
         ]);
+
         const rows = [];
         DAYS.forEach(d => SHIFTS.forEach(s => {
             if (d === 'שישי' && s === 'ערב') return;
             let names = [];
             for(let i=1; i<=3; i++) {
-                const n = document.getElementById(`manual-${d}_${s}-${i}`).value.trim() || document.getElementById(`sel-${d}_${s}-${i}`).value;
+                const manualInput = document.getElementById(`manual-${d}_${s}-${i}`);
+                const selectBox = document.getElementById(`sel-${d}_${s}-${i}`);
+                
+                const n = manualInput.value.trim() || selectBox.value;
                 if(n) names.push(n);
+                
+                // ניקוי השדה הידני למניעת שאריות
+                manualInput.value = "";
             }
             if(names.length) rows.push({ day_id: d, shift_id: s, person_name: names.join(', '), published_at: new Date().toISOString() });
         }));
-        if(rows.length) { await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify(rows) }); }
-        alert('פורסם! המערכת נקייה לשבוע חדש.'); location.reload();
+
+        if(rows.length) { 
+            await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { 
+                method: 'POST', 
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(rows) 
+            }); 
+        }
+        alert('פורסם! המערכת נוקתה לשבוע חדש.'); 
+        location.reload();
     }
 
+    // שאר הפונקציות ללא שינוי
     async function sendAvailability() {
         const name = document.getElementById('emp-name').value.trim();
         if(!name) return alert('שם חובה');
         const filteredAvail = {};
-        for (let key in avail) {
-            if (avail[key] !== 'none') filteredAvail[key] = avail[key];
-        }
+        for (let key in avail) { if (avail[key] !== 'none') filteredAvail[key] = avail[key]; }
         await fetch(`${SUPABASE_URL}/rest/v1/shifts`, { 
             method: 'POST', 
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ 
-                name, 
-                availability: filteredAvail, 
-                notes: document.getElementById('emp-notes').value, 
-                submitted_at: new Date().toISOString() 
-            }) 
+            body: JSON.stringify({ name, availability: filteredAvail, notes: document.getElementById('emp-notes').value, submitted_at: new Date().toISOString() }) 
         });
         alert('נשלח!'); location.reload();
     }
 
+    function toggleQuickEdit() { isEditing = !isEditing; document.getElementById('quick-save-area').style.display = isEditing ? 'flex' : 'none'; document.getElementById('quick-edit-btn').innerText = isEditing ? 'בטל' : 'עריכה'; renderPublishedList(); }
     async function deletePublishedOnly() { if(confirm('למחוק פרסום?')) { await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); location.reload(); } }
     init();
 </script>
