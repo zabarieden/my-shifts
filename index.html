@@ -201,6 +201,9 @@
 
     function renderPublishedList() {
         const list = document.getElementById('schedule-list');
+        const dayOrder = {'ראשון':1, 'שני':2, 'שלישי':3, 'רביעי':4, 'חמישי':5, 'שישי':6};
+        currentSchedule.sort((a,b) => dayOrder[a.day_id] - dayOrder[b.day_id]);
+
         if (isEditing) { 
             list.innerHTML = currentSchedule.map(i => `<div style="margin-bottom:8px;"><strong>יום ${i.day_id} ${i.shift_id}:</strong> <input type="text" class="quick-edit-input" data-day="${i.day_id}" data-shift="${i.shift_id}" value="${i.person_name}"></div>`).join(''); 
         } else { 
@@ -226,10 +229,6 @@
     async function loadPublishedSchedule() {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
         currentSchedule = await res.json();
-        // מיון פשוט לפי ימים כדי שהתצוגה תהיה עקבית
-        const dayOrder = {'ראשון':1, 'שני':2, 'שלישי':3, 'רביעי':4, 'חמישי':5, 'שישי':6};
-        currentSchedule.sort((a,b) => dayOrder[a.day_id] - dayOrder[b.day_id]);
-        
         if(currentSchedule.length) { document.getElementById('published-box').style.display = 'block'; renderPublishedList(); }
     }
 
@@ -240,33 +239,45 @@
         renderPublishedList(); 
     }
 
+    // פונקציית השמירה המעודכנת והיציבה
     async function saveQuickEdit() {
-        const updates = Array.from(document.querySelectorAll('.quick-edit-input')).map(input => ({ 
-            day_id: input.dataset.day, 
-            shift_id: input.dataset.shift, 
-            person_name: input.value, 
-            published_at: new Date().toISOString() 
-        }));
-        
-        // מחיקה ועדכון
-        await fetch(`${SUPABASE_URL}/rest/v1/schedule?day_id=neq.ZZZ`, { 
-            method: 'DELETE', 
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } 
+        const inputs = document.querySelectorAll('.quick-edit-input');
+        const promises = [];
+
+        inputs.forEach(input => {
+            const day = input.dataset.day;
+            const shift = input.dataset.shift;
+            const newName = input.value;
+
+            // עדכון ישיר לפי יום ומשמרת
+            promises.push(
+                fetch(`${SUPABASE_URL}/rest/v1/schedule?day_id=eq.${day}&shift_id=eq.${shift}`, {
+                    method: 'PATCH',
+                    headers: { 
+                        'apikey': SUPABASE_KEY, 
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ person_name: newName, published_at: new Date().toISOString() })
+                })
+            );
         });
-        
-        await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { 
-            method: 'POST', 
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }, 
-            body: JSON.stringify(updates) 
-        });
-        
-        alert('עודכן!'); location.reload();
+
+        try {
+            await Promise.all(promises);
+            alert('השינויים נשמרו בהצלחה!');
+            location.reload();
+        } catch (e) {
+            alert('שגיאה בשמירה, נסה שנית.');
+        }
     }
 
     async function publishSchedule() {
         if(!confirm('לפרסם ולנקות הכל לשבוע הבא?')) return;
+        // מחיקה כללית עובדת עם neq על מזהה שלא קיים
         await fetch(`${SUPABASE_URL}/rest/v1/schedule?day_id=neq.ZZZ`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-        await fetch(`${SUPABASE_URL}/rest/v1/shifts?id=gt.0`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+        await fetch(`${SUPABASE_URL}/rest/v1/shifts?name=neq.ZZZ`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
 
         const rows = [];
         DAYS.forEach(d => SHIFTS.forEach(s => {
