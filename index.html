@@ -40,6 +40,7 @@
         .manager-row { padding: 12px; border-bottom: 1px solid #eee; background: #fafafa; }
         .slot { display: flex; gap: 5px; margin-bottom: 8px; align-items: center; }
         .slot-time { font-size: 12px; font-weight: 800; color: #64748B; min-width: 45px; text-align: left; }
+        .slot-time-input { font-size: 12px; font-weight: 800; color: #334155; width: 50px; padding: 4px; margin-bottom: 0; text-align: center; border: 1px solid var(--border); border-radius: 4px; }
         
         #published-box { margin-top: 20px; padding: 15px; background: #E0F2FE; border-radius: 10px; border: 1px solid #7DD3FC; display: none; position: relative; }
         .edit-controls { margin-top: 10px; display: flex; gap: 5px; }
@@ -171,19 +172,23 @@
                 const maxSlots = (d === 'שישי') ? 5 : 3;
 
                 for(let i=0; i<maxSlots; i++) {
-                    let hourLabel = "";
+                    html += `<div class="slot">`;
+                    
                     if (d === 'שישי') {
-                        if (i === 0 || i === 1) hourLabel = "07:00";
-                        else if (i === 2) hourLabel = "08:00";
-                        else hourLabel = "--:--"; // משבצות 4 ו-5 מתחילות ריקות כדי שהמנהלת תרשום שעה
+                        if (i === 0 || i === 1) {
+                            html += `<span class="slot-time">07:00</span>`;
+                        } else if (i === 2) {
+                            html += `<span class="slot-time">08:00</span>`;
+                        } else {
+                            // שתי המשבצות החדשות של יום שישי מקבלות שדה קלט להקלדת שעה חופשית
+                            html += `<input type="text" id="time-${key}-${i+1}" placeholder="שעה" class="slot-time-input">`;
+                        }
                     } else {
-                        if (i === 0) hourLabel = (s === 'בוקר' ? "07:00" : "14:00");
-                        else if (i === 1) hourLabel = (s === 'בוקר' ? "09:00" : "16:00");
-                        else hourLabel = "--:--";
+                        if (i === 0) html += `<span class="slot-time">${s === 'בוקר' ? "07:00" : "14:00"}</span>`;
+                        else if (i === 1) html += `<span class="slot-time">${s === 'בוקר' ? "09:00" : "16:00"}</span>`;
+                        else html += `<span class="slot-time">--:--</span>`;
                     }
 
-                    html += `<div class="slot">`;
-                    html += `<span class="slot-time">${hourLabel}</span>`;
                     html += `<select id="sel-${key}-${i+1}"><option value="">בחר עובד...</option>`;
                     allSubmissions.forEach(e => {
                         const status = e.availability[key];
@@ -193,7 +198,7 @@
                         }
                     });
                     html += `</select>`;
-                    html += `<input type="text" id="manual-${key}-${i+1}" placeholder="ידני/שעה" style="width:80px;"></div>`;
+                    html += `<input type="text" id="manual-${key}-${i+1}" placeholder="ידני" style="width:80px;"></div>`;
                 }
                 html += `</div>`;
             });
@@ -215,7 +220,9 @@
                 const formattedNames = names.map((name, index) => {
                     if (!name.trim()) return "";
                     
-                    // החזרת הלוגיקה המקורית של בדיקת השעות עבור ה-3 הראשונים
+                    // אם השם כבר מכיל פורמט שעה שהוזן ידנית מהמשבצות החדשות, נציג אותו כמו שהוא
+                    if (/^\d{2}:\d{2}/.test(name) || name.includes('-')) return name;
+                    
                     let hour = "";
                     if (i.day_id === 'שישי') {
                         if (index === 0 || index === 1) hour = "07:00";
@@ -224,9 +231,6 @@
                         if (index === 0) hour = (i.shift_id === 'בוקר' ? "07:00" : "14:00");
                         else if (index === 1) hour = (i.shift_id === 'בוקר' ? "09:00" : "16:00");
                     }
-                    
-                    // אם כבר יש לשם תבנית של שעה מוגדרת (כמו במשבצות 4 ו-5), פשוט נחזיר אותו
-                    if (/^\d{2}:\d{2}/.test(name)) return name;
                     
                     return hour ? `${hour} ${name}` : name;
                 }).filter(n => n !== "").join(', ');
@@ -239,11 +243,6 @@
         const res = await fetch(`${SUPABASE_URL}/rest/v1/schedule`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
         currentSchedule = await res.json();
         if(currentSchedule.length) { document.getElementById('published-box').style.display = 'block'; renderPublishedList(); }
-    }
-
-    // פונקציה מסייעת לבדוק אם מחרוזת היא בפורמט שעה (למשל 08:00 או 12:30)
-    function isTimeString(str) {
-        return /^\d{2}:\d{2}$/.test(str);
     }
 
     function toggleQuickEdit() { 
@@ -300,18 +299,19 @@
             for(let i=1; i<=maxSlots; i++) {
                 const manual = document.getElementById(`manual-${d}_${s}-${i}`).value.trim();
                 const sel = document.getElementById(`sel-${d}_${s}-${i}`).value;
+                const targetPerson = manual || sel;
                 
-                if (sel || manual) {
-                    // טיפול מיוחד למשבצות 4 ו-5 בשישי: המנהלת רושמת שעה בידני ובוחרת עובד בסלקט
+                if (targetPerson) {
+                    // אם מדובר במשבצת 4 או 5 ביום שישי, נבדוק אם הוזנה שעה בשדה השעה החדש
                     if (d === 'שישי' && (i === 4 || i === 5)) {
-                        if (manual && sel) {
-                            names.push(`${manual} ${sel}`);
+                        const customTime = document.getElementById(`time-${d}_${s}-${i}`).value.trim();
+                        if (customTime) {
+                            names.push(`${customTime} ${targetPerson}`);
                         } else {
-                            names.push(manual || sel);
+                            names.push(targetPerson);
                         }
                     } else {
-                        // שאר המשבצות הרגילות פועלות בדיוק כמו פעם
-                        names.push(manual || sel);
+                        names.push(targetPerson);
                     }
                 }
             }
