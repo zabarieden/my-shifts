@@ -213,7 +213,15 @@
     function renderPublishedList() {
         const list = document.getElementById('schedule-list');
         const dayOrder = {'ראשון':1, 'שני':2, 'שלישי':3, 'רביעי':4, 'חמישי':5, 'שישי':6};
-        currentSchedule.sort((a,b) => dayOrder[a.day_id] - dayOrder[b.day_id]);
+        const shiftOrder = {'בוקר':1, 'ערב':2};
+        
+        // מיון כפול: קודם לפי ימים, ואז בתוך כל יום - בוקר תמיד לפני ערב
+        currentSchedule.sort((a,b) => {
+            if (dayOrder[a.day_id] !== dayOrder[b.day_id]) {
+                return dayOrder[a.day_id] - dayOrder[b.day_id];
+            }
+            return shiftOrder[a.shift_id] - shiftOrder[b.shift_id];
+        });
 
         if (isEditing) { 
             list.innerHTML = currentSchedule.map(i => `<div style="margin-bottom:8px;"><strong>יום ${i.day_id} ${i.shift_id}:</strong> <input type="text" class="quick-edit-input" data-day="${i.day_id}" data-shift="${i.shift_id}" value="${i.person_name}"></div>`).join(''); 
