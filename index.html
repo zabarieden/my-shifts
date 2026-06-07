@@ -177,18 +177,22 @@
                     if (d === 'שישי') {
                         if (i === 0 || i === 1) {
                             html += `<span class="slot-time">07:00</span>`;
-                        } else if (i === 2) {
-                            html += `<span class="slot-time">08:00</span>`;
                         } else {
                             html += `<input type="text" id="time-${key}-${i+1}" placeholder="שעה" class="slot-time-input">`;
                         }
                     } else {
-                        if (i === 0) {
-                            html += `<span class="slot-time">${s === 'בוקר' ? "07:00" : "14:00"}</span>`;
-                        } else if (i === 1) {
-                            html += `<span class="slot-time">${s === 'בוקר' ? "09:00" : "16:00"}</span>`;
-                        } else {
-                            html += `<input type="text" id="time-${key}-${i+1}" placeholder="שעה" class="slot-time-input">`;
+                        if (s === 'בוקר') {
+                            if (i === 0) {
+                                html += `<span class="slot-time">07:00</span>`;
+                            } else {
+                                html += `<input type="text" id="time-${key}-${i+1}" placeholder="שעה" class="slot-time-input">`;
+                            }
+                        } else { // משמרת ערב ימי חול
+                            if (i === 0) {
+                                html += `<span class="slot-time">14:00</span>`;
+                            } else {
+                                html += `<input type="text" id="time-${key}-${i+1}" placeholder="שעה" class="slot-time-input">`;
+                            }
                         }
                     }
 
@@ -215,7 +219,6 @@
         const dayOrder = {'ראשון':1, 'שני':2, 'שלישי':3, 'רביעי':4, 'חמישי':5, 'שישי':6};
         const shiftOrder = {'בוקר':1, 'ערב':2};
         
-        // מיון כפול: קודם לפי ימים, ואז בתוך כל יום - בוקר תמיד לפני ערב
         currentSchedule.sort((a,b) => {
             if (dayOrder[a.day_id] !== dayOrder[b.day_id]) {
                 return dayOrder[a.day_id] - dayOrder[b.day_id];
@@ -227,24 +230,8 @@
             list.innerHTML = currentSchedule.map(i => `<div style="margin-bottom:8px;"><strong>יום ${i.day_id} ${i.shift_id}:</strong> <input type="text" class="quick-edit-input" data-day="${i.day_id}" data-shift="${i.shift_id}" value="${i.person_name}"></div>`).join(''); 
         } else { 
             list.innerHTML = currentSchedule.map(i => {
-                const names = i.person_name.split(', ');
-                const formattedNames = names.map((name, index) => {
-                    if (!name.trim()) return "";
-                    
-                    if (/^\d{2}:\d{2}/.test(name) || name.includes('-')) return name;
-                    
-                    let hour = "";
-                    if (i.day_id === 'שישי') {
-                        if (index === 0 || index === 1) hour = "07:00";
-                        else if (index === 2) hour = "08:00";
-                    } else {
-                        if (index === 0) hour = (i.shift_id === 'בוקר' ? "07:00" : "14:00");
-                        else if (index === 1) hour = (i.shift_id === 'בוקר' ? "09:00" : "16:00");
-                    }
-                    
-                    return hour ? `${hour} ${name}` : name;
-                }).filter(n => n !== "").join(', ');
-                return `<div><strong>יום ${i.day_id} ${i.shift_id}:</strong> ${formattedNames}</div>`;
+                if (!i.person_name || !i.person_name.trim()) return "";
+                return `<div><strong>יום ${i.day_id} ${i.shift_id}:</strong> ${i.person_name}</div>`;
             }).join(''); 
         }
     }
@@ -313,12 +300,15 @@
                 
                 if (targetPerson) {
                     let defaultHour = "";
+                    
                     if (d === 'שישי') {
                         if (i === 0 || i === 1) defaultHour = "07:00";
-                        else if (i === 2) defaultHour = "08:00";
                     } else {
-                        if (i === 0) defaultHour = (s === 'בוקר' ? "07:00" : "14:00");
-                        else if (i === 1) defaultHour = (s === 'בוקר' ? "09:00" : "16:00");
+                        if (s === 'בוקר') {
+                            if (i === 0) defaultHour = "07:00";
+                        } else {
+                            if (i === 0) defaultHour = "14:00";
+                        }
                     }
 
                     const timeInput = document.getElementById(`time-${d}_${s}-${i+1}`);
