@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מערכת ניהול משמרות</title>
+    <title>Mظام ניהול משמרות</title>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #FDF5E6; --surface: #ffffff; --accent: #2D6A4F; --accent-light: #D8F3DC; --text: #334155; --border: #E2E8F0; --danger: #EF4444; --info: #0284C7; }
@@ -69,7 +69,7 @@
     <div id="navigation-tabs" class="tabs">
         <button id="btn-submit" class="tab-btn active" onclick="switchTab('submit')">הגשת זמינות</button>
         <button id="btn-opening" class="tab-btn" onclick="switchTab('opening')">נוהל פתיחה</button>
-        <button id="btn-daily" class="tab-btn" onclick="switchTab('daily')">משימות בוקר יומיות</button>
+        <button id="btn-daily" class="tab-btn" onclick="switchTab('daily')">משימות יומיות</button>
         <button id="btn-closing" class="tab-btn" onclick="switchTab('closing')">נוהל סגירת מקום</button>
         <button id="btn-manage" class="tab-btn" style="display: none;" onclick="switchTab('manage')">בניית סידור</button>
     </div>
@@ -139,7 +139,12 @@
     </div>
 
     <div id="daily-section" style="display:none;">
-        <h2>🗓️ משימות בוקר לפי ימים</h2>
+        <h2>🗓️ משימות יומיות</h2>
+        
+        <div class="daily-day-title">🔄 משימות קבועות (כל יום)</div>
+        <ul class="daily-task-list">
+            <li class="daily-task-item">אריזות של קופסאות</li>
+        </ul>
         
         <div class="daily-day-title">יום ראשון</div>
         <ul class="daily-task-list">
@@ -165,7 +170,7 @@
         <div class="daily-day-title">יום חמישי</div>
         <ul class="daily-task-list">
             <li class="daily-task-item">קופיקלין</li>
-            <li class="daily-task-item">להתחיל אריזות של קופסאות</li>
+            <li class="daily-task-item">לוודא שיש את כל הקופסאות</li>
         </ul>
 
         <div class="daily-day-title">יום שישי</div>
