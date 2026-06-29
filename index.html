@@ -1,3 +1,4 @@
+HTML
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -49,12 +50,18 @@
         .notes-area { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 15px; margin-bottom: 20px; font-size: 14px; }
         .note-item { margin-bottom: 8px; border-bottom: 1px solid #fef3c7; padding-bottom: 5px; }
 
-        /* עיצוב דפי נהלים */
+        /* עיצוב דפי נהלים ומשימות */
         .closing-category { margin-top: 20px; margin-bottom: 10px; padding: 6px 10px; background: var(--accent-light); border-radius: 6px; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 5px; }
         .closing-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 15px; cursor: pointer; padding: 6px; border-radius: 6px; transition: background 0.2s; border-bottom: 1px solid #f1f5f9; }
         .closing-item:hover { background: #f8fafc; }
         .closing-item input[type="checkbox"] { width: auto; margin-top: 4px; cursor: pointer; width: 18px; height: 18px; }
         .closing-item-text { line-height: 1.4; color: var(--text); }
+
+        /* עיצוב רשימה יומית קבועה */
+        .daily-day-title { font-weight: 800; color: var(--accent); margin-top: 15px; font-size: 16px; border-bottom: 2px solid var(--accent-light); padding-bottom: 4px; }
+        .daily-task-list { list-style-type: none; padding-right: 15px; margin-top: 8px; margin-bottom: 15px; }
+        .daily-task-item { font-size: 15px; margin-bottom: 6px; position: relative; color: var(--text); }
+        .daily-task-item::before { content: "•"; color: var(--accent); font-weight: bold; display: inline-block; width: 12px; margin-right: -12px; }
     </style>
 </head>
 <body>
@@ -63,6 +70,7 @@
     <div id="navigation-tabs" class="tabs">
         <button id="btn-submit" class="tab-btn active" onclick="switchTab('submit')">הגשת זמינות</button>
         <button id="btn-opening" class="tab-btn" onclick="switchTab('opening')">נוהל פתיחה</button>
+        <button id="btn-daily" class="tab-btn" onclick="switchTab('daily')">משימות בוקר יומיות</button>
         <button id="btn-closing" class="tab-btn" onclick="switchTab('closing')">נוהל סגירת מקום</button>
         <button id="btn-manage" class="tab-btn" style="display: none;" onclick="switchTab('manage')">בניית סידור</button>
     </div>
@@ -93,7 +101,6 @@
         <button class="btn" id="submit-btn" onclick="sendAvailability()">שליחת זמינות</button>
     </div>
 
-    <!-- נוהל פתיחה -->
     <div id="opening-section" style="display:none;">
         <h2>☀️ רשימת נוהל פתיחה</h2>
         
@@ -116,6 +123,9 @@
         <label class="closing-item"><input type="checkbox" data-idx="112"><span class="closing-item-text">סידור וטרינת מאפים כולל שלטים</span></label>
         <label class="closing-item"><input type="checkbox" data-idx="113"><span class="closing-item-text">סידור וטרינת קינוחים</span></label>
 
+        <div class="closing-category">🪑 חוץ</div>
+        <label class="closing-item"><input type="checkbox" data-idx="122"><span class="closing-item-text">לפתוח שמשיות</span></label>
+
         <div class="closing-category">💰 קופות</div>
         <label class="closing-item"><input type="checkbox" data-idx="114"><span class="closing-item-text">בדיקת הצהרת קופה</span></label>
         <label class="closing-item"><input type="checkbox" data-idx="115"><span class="closing-item-text">בהחלפת משמרת - דוח X</span></label>
@@ -127,12 +137,44 @@
         <label class="closing-item"><input type="checkbox" data-idx="119"><span class="closing-item-text">ניקוי עמדת קפה וכדים</span></label>
         <label class="closing-item"><input type="checkbox" data-idx="120"><span class="closing-item-text">החלפת פח</span></label>
         <label class="closing-item"><input type="checkbox" data-idx="121"><span class="closing-item-text">סביבה נקייה ונעימה</span></label>
-
-        <div class="closing-category">🪑 חוץ</div>
-        <label class="closing-item"><input type="checkbox" data-idx="122"><span class="closing-item-text">לפתוח שמשיות</span></label>
     </div>
 
-    <!-- נוהל סגירה -->
+    <div id="daily-section" style="display:none;">
+        <h2>🗓️ משימות בוקר לפי ימים</h2>
+        
+        <div class="daily-day-title">יום ראשון</div>
+        <ul class="daily-task-list">
+            <li class="daily-task-item">אבק ממדפים ומנורות</li>
+        </ul>
+
+        <div class="daily-day-title">יום שני</div>
+        <ul class="daily-task-list">
+            <li class="daily-task-item">ניקיון מקרר ומקפיא</li>
+        </ul>
+
+        <div class="daily-day-title">יום שלישי</div>
+        <ul class="daily-task-list">
+            <li class="daily-task-item">ניקיון ריהוט חוץ</li>
+        </ul>
+
+        <div class="daily-day-title">יום רביעי</div>
+        <ul class="daily-task-list">
+            <li class="daily-task-item">השקייה</li>
+            <li class="daily-task-item">ניקיון מעל הבר</li>
+        </ul>
+
+        <div class="daily-day-title">יום חמישי</div>
+        <ul class="daily-task-list">
+            <li class="daily-task-item">קופיקלין</li>
+            <li class="daily-task-item">להתחיל אריזות של קופסאות</li>
+        </ul>
+
+        <div class="daily-day-title">יום שישי</div>
+        <ul class="daily-task-list">
+            <li class="daily-task-item">סופ"ש נעים!</li>
+        </ul>
+    </div>
+
     <div id="closing-section" style="display:none;">
         <h2>📋 רשימת סגירת מקום</h2>
         
@@ -305,11 +347,13 @@
     function switchTab(t) {
         document.getElementById('submit-section').style.display = t === 'submit' ? 'block' : 'none';
         document.getElementById('opening-section').style.display = t === 'opening' ? 'block' : 'none';
+        document.getElementById('daily-section').style.display = t === 'daily' ? 'block' : 'none';
         document.getElementById('closing-section').style.display = t === 'closing' ? 'block' : 'none';
         document.getElementById('manage-section').style.display = t === 'manage' ? 'block' : 'none';
         
         document.getElementById('btn-submit').classList.toggle('active', t === 'submit');
         document.getElementById('btn-opening').classList.toggle('active', t === 'opening');
+        document.getElementById('btn-daily').classList.toggle('active', t === 'daily');
         document.getElementById('btn-closing').classList.toggle('active', t === 'closing');
         document.getElementById('btn-manage').classList.toggle('active', t === 'manage');
     }
