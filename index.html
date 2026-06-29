@@ -49,7 +49,7 @@
         .notes-area { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 15px; margin-bottom: 20px; font-size: 14px; }
         .note-item { margin-bottom: 8px; border-bottom: 1px solid #fef3c7; padding-bottom: 5px; }
 
-        /* עיצוב דף נוהל סגירה */
+        /* עיצוב דפי נהלים */
         .closing-category { margin-top: 20px; margin-bottom: 10px; padding: 6px 10px; background: var(--accent-light); border-radius: 6px; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 5px; }
         .closing-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 15px; cursor: pointer; padding: 6px; border-radius: 6px; transition: background 0.2s; border-bottom: 1px solid #f1f5f9; }
         .closing-item:hover { background: #f8fafc; }
@@ -62,6 +62,7 @@
 <div class="card">
     <div id="navigation-tabs" class="tabs">
         <button id="btn-submit" class="tab-btn active" onclick="switchTab('submit')">הגשת זמינות</button>
+        <button id="btn-opening" class="tab-btn" onclick="switchTab('opening')">נוהל פתיחה</button>
         <button id="btn-closing" class="tab-btn" onclick="switchTab('closing')">נוהל סגירת מקום</button>
         <button id="btn-manage" class="tab-btn" style="display: none;" onclick="switchTab('manage')">בניית סידור</button>
     </div>
@@ -92,6 +93,46 @@
         <button class="btn" id="submit-btn" onclick="sendAvailability()">שליחת זמינות</button>
     </div>
 
+    <!-- נוהל פתיחה -->
+    <div id="opening-section" style="display:none;">
+        <h2>☀️ רשימת נוהל פתיחה</h2>
+        
+        <div class="closing-category">🏠 כללי ופרונט</div>
+        <label class="closing-item"><input type="checkbox" data-idx="101"><span class="closing-item-text">הדלקת אור</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="102"><span class="closing-item-text">הדלקת מזגנים</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="103"><span class="closing-item-text">לשים מוזיקה</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="104"><span class="closing-item-text">סידור שולחנות וכסאות בפנים</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="105"><span class="closing-item-text">טאטוא</span></label>
+
+        <div class="closing-category">☕ בר</div>
+        <label class="closing-item"><input type="checkbox" data-idx="106"><span class="closing-item-text">הדלקת מכונת קפה (לוודא שחמה)</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="107"><span class="closing-item-text">הורדת מנה אחת מכל ראש</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="108"><span class="closing-item-text">להפעיל סטימר לחצי דקה</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="109"><span class="closing-item-text">לוודא מלאים וניקיון</span></label>
+
+        <div class="closing-category">🍰 תצוגה ומקררים</div>
+        <label class="closing-item"><input type="checkbox" data-idx="110"><span class="closing-item-text">סידור מקרר שתיה</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="111"><span class="closing-item-text">מקרר עוגות ראווה</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="112"><span class="closing-item-text">סידור וטרינת מאפים כולל שלטים</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="113"><span class="closing-item-text">סידור וטרינת קינוחים</span></label>
+
+        <div class="closing-category">💰 קופות</div>
+        <label class="closing-item"><input type="checkbox" data-idx="114"><span class="closing-item-text">בדיקת הצהרת קופה</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="115"><span class="closing-item-text">בהחלפת משמרת - דוח X</span></label>
+
+        <div class="closing-category">📦 מלאי להחלפת משמרת</div>
+        <label class="closing-item"><input type="checkbox" data-idx="116"><span class="closing-item-text">5 חלב רגיל</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="117"><span class="closing-item-text">5 מכל תחליף</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="118"><span class="closing-item-text">עמדת TA</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="119"><span class="closing-item-text">ניקוי עמדת קפה וכדים</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="120"><span class="closing-item-text">החלפת פח</span></label>
+        <label class="closing-item"><input type="checkbox" data-idx="121"><span class="closing-item-text">סביבה נקייה ונעימה</span></label>
+
+        <div class="closing-category">🪑 חוץ</div>
+        <label class="closing-item"><input type="checkbox" data-idx="122"><span class="closing-item-text">לפתוח שמשיות</span></label>
+    </div>
+
+    <!-- נוהל סגירה -->
     <div id="closing-section" style="display:none;">
         <h2>📋 רשימת סגירת מקום</h2>
         
@@ -208,20 +249,20 @@
         }
         renderSubmitGrid();
         loadPublishedSchedule();
-        initClosingList();
+        initChecklists();
     }
 
-    function initClosingList() {
+    function initChecklists() {
         const todayStr = new Date().toDateString();
-        const lastSavedDate = localStorage.getItem('closing_list_date');
+        const lastSavedDate = localStorage.getItem('checklist_date');
         
         if (lastSavedDate !== todayStr) {
-            localStorage.removeItem('closing_list_state');
-            localStorage.setItem('closing_list_date', todayStr);
+            localStorage.removeItem('checklist_state');
+            localStorage.setItem('checklist_date', todayStr);
         }
 
-        const savedState = JSON.parse(localStorage.getItem('closing_list_state')) || {};
-        const checkboxes = document.querySelectorAll('#closing-section input[type="checkbox"]');
+        const savedState = JSON.parse(localStorage.getItem('checklist_state')) || {};
+        const checkboxes = document.querySelectorAll('#closing-section input[type="checkbox"], #opening-section input[type="checkbox"]');
 
         checkboxes.forEach(cb => {
             const idx = cb.dataset.idx;
@@ -230,13 +271,13 @@
             }
             
             cb.addEventListener('change', () => {
-                const currentState = JSON.parse(localStorage.getItem('closing_list_state')) || {};
+                const currentState = JSON.parse(localStorage.getItem('checklist_state')) || {};
                 if (cb.checked) {
                     currentState[idx] = true;
                 } else {
                     delete currentState[idx];
                 }
-                localStorage.setItem('closing_list_state', JSON.stringify(currentState));
+                localStorage.setItem('checklist_state', JSON.stringify(currentState));
             });
         });
     }
@@ -263,10 +304,12 @@
 
     function switchTab(t) {
         document.getElementById('submit-section').style.display = t === 'submit' ? 'block' : 'none';
+        document.getElementById('opening-section').style.display = t === 'opening' ? 'block' : 'none';
         document.getElementById('closing-section').style.display = t === 'closing' ? 'block' : 'none';
         document.getElementById('manage-section').style.display = t === 'manage' ? 'block' : 'none';
         
         document.getElementById('btn-submit').classList.toggle('active', t === 'submit');
+        document.getElementById('btn-opening').classList.toggle('active', t === 'opening');
         document.getElementById('btn-closing').classList.toggle('active', t === 'closing');
         document.getElementById('btn-manage').classList.toggle('active', t === 'manage');
     }
